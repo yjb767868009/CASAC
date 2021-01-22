@@ -11,7 +11,7 @@ class BERT(nn.Module):
     """
 
     def __init__(self, encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
-                 hidden=640, n_layers=16, attn_heads=16, dropout=0.1):
+                 hidden= 1280, n_layers=16, attn_heads=16, dropout=0.1):
         """
         :param input_size: input_size
         :param hidden: BERT model hidden size

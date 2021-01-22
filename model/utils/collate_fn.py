@@ -1,3 +1,4 @@
+import torch
 import torch.nn.utils.rnn as rnn_utils
 
 

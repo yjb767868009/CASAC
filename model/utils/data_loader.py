@@ -10,9 +10,7 @@ def load_data(data_root, cache=True):
         print("Loading cache")
         data_source.load_all_data()
         print("Loading finish")
-    train_source = data_source
-    test_source = data_source
-    return train_source, test_source
+    return data_source
 
 
 

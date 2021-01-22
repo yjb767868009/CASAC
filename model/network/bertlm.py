@@ -10,7 +10,7 @@ class BERTLM(nn.Module):
     Next Sentence Prediction Model + Masked Language Model
     """
 
-    def __init__(self, bert: BERT, input_dim=640, hidden=1024, output_dim=618, dropout=0.1):
+    def __init__(self, bert: BERT, input_dim= 1280, hidden=1024, output_dim=618, dropout=0.1):
         """
         :param bert: BERT model which should be trained
         :param vocab_size: total vocab size for masked_lm
@@ -21,9 +21,12 @@ class BERTLM(nn.Module):
         self.next_sentence = NextSentencePrediction(input_dim, hidden, 618, dropout)
         self.mask_lm = MaskedLanguageModel(input_dim, hidden, 5307, dropout)
 
-    def forward(self, x, data_length):
+    def forward(self, x, data_length, train=True):
         x = self.bert(x, data_length)
-        return self.next_sentence(x, data_length), self.mask_lm(x, data_length)
+        if train:
+            return self.next_sentence(x, data_length), self.mask_lm(x, data_length)
+        else:
+            return self.next_sentence(x, data_length)
 
 
 class NextSentencePrediction(nn.Module):
@@ -33,18 +36,18 @@ class NextSentencePrediction(nn.Module):
         :param hidden: BERT model output size
         """
         super().__init__()
-        self.fc1 = nn.Sequential(nn.Linear(input_dim, hidden), nn.ELU(), )
+        self.start_layer = nn.Sequential(nn.Linear(input_dim, hidden), nn.ELU(), )
         # self.lstm1 = nn.LSTM(hidden, hidden, dropout=dropout, batch_first=True)
         # self.lstm2 = nn.LSTM(hidden, hidden, dropout=dropout, batch_first=True)
-        self.fc3 = nn.Sequential(nn.Linear(hidden, output_dim))
+        self.end_layer = nn.Sequential(nn.Linear(hidden, output_dim))
 
     def forward(self, x, x_length):
-        x = self.fc1(x)
-        x = rnn_utils.pack_padded_sequence(x, x_length, batch_first=True)
+        x = self.start_layer(x)
+        # x = rnn_utils.pack_padded_sequence(x, x_length, batch_first=True)
         # x, (h_1, c_1) = self.lstm1(x)
         # x, (h_1, c_1) = self.lstm2(x)
-        x, x_length = rnn_utils.pad_packed_sequence(x, batch_first=True, padding_value=0)
-        x = self.fc3(x)
+        # x, x_length = rnn_utils.pad_packed_sequence(x, batch_first=True, padding_value=0)
+        x = self.end_layer(x)
         return x
 
 
@@ -60,16 +63,16 @@ class MaskedLanguageModel(nn.Module):
         :param vocab_size: total vocab size
         """
         super().__init__()
-        self.fc1 = nn.Sequential(nn.Linear(input_dim, hidden), nn.ELU(), )
+        self.start_layer = nn.Sequential(nn.Linear(input_dim, hidden), nn.ELU(), )
         # self.lstm1 = nn.LSTM(hidden, hidden, dropout=dropout, batch_first=True)
         # self.lstm2 = nn.LSTM(hidden, hidden, dropout=dropout, batch_first=True)
-        self.fc3 = nn.Sequential(nn.Linear(hidden, output_dim), )
+        self.end_layer = nn.Sequential(nn.Linear(hidden, output_dim), )
 
     def forward(self, x, x_length):
-        x = self.fc1(x)
-        x = rnn_utils.pack_padded_sequence(x, x_length, batch_first=True)
+        x = self.start_layer(x)
+        # x = rnn_utils.pack_padded_sequence(x, x_length, batch_first=True)
         # x, (h_1, c_1) = self.lstm1(x)
         # x, (h_1, c_1) = self.lstm2(x)
-        x, x_length = rnn_utils.pad_packed_sequence(x, batch_first=True, padding_value=0)
-        x = self.fc3(x)
+        # x, x_length = rnn_utils.pad_packed_sequence(x, batch_first=True, padding_value=0)
+        x = self.end_layer(x)
         return x

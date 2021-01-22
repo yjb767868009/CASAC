@@ -28,7 +28,7 @@ class DataSet(tordata.Dataset):
         return self.__getitem__(index)
 
     def load_all_data(self):
-        for i in tqdm(range(self.data_size)):
+        for i in tqdm(range(self.data_size), ncols=100):
             self.load_data(i)
 
     def __len__(self):
@@ -56,7 +56,6 @@ class DataSet(tordata.Dataset):
         return input_data, input_data_random, label_data
 
     def random_word(self, data):
-        output_label = data.clone()
         for i in range(data.size(0)):
             prob = random.random()
             if prob < 0.15:
