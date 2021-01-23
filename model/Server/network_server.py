@@ -9,7 +9,7 @@ from model.utils.initialization import initialization
 
 class Server(object):
     def __init__(self, model_path):
-        self.model = initialization(100, 1, None, model_path, model_path,train=False)
+        self.model = initialization(100, 1, None, model_path, model_path, train=False, unity=True)
         self.model.load_param()
         self.data = torch.empty(0, 5307)
         self.full = False

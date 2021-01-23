@@ -8,7 +8,7 @@ from model.Server.network_server import Server
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 print("Building Server")
-server = Server()
+server = Server('E:/NSM/trained20210123/')
 print("Building Finish")
 
 

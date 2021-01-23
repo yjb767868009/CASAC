@@ -4,13 +4,16 @@ from model.bert.model import Model
 from model.bert.config import conf
 
 
-def initialization(epoch, batch_size, data_root, save_path, load_path, cache=True, train=True):
+def initialization(epoch, batch_size, data_root, save_path, load_path, cache=True, train=True, unity=False):
     print("Initializing model...")
     conf['epoch'] = epoch
     conf['batch_size'] = batch_size
     conf['save_path'] = save_path
     conf['load_path'] = load_path
-    if train:
+    if unity:
+        train_source = None
+        test_source = None
+    elif train:
         train_source = load_data(os.path.join(data_root, "Train"), cache=cache)
         test_source = load_data(os.path.join(data_root, "Test"), cache=cache)
     else:
