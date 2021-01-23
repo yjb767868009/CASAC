@@ -47,6 +47,7 @@ class Model(object):
             self.model = nn.DataParallel(self.model)
 
         # build optimizer
+        self.base_lr = lr
         self.lr = lr
         self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr)
 
@@ -73,6 +74,25 @@ class Model(object):
     def forward(self, x, x_length=None, pre_train=True):
         return self.model(x, x_length, pre_train)
 
+    def step_train(self, train_data_iter, test_data_iter, pre_train=False):
+        self.lr = self.base_lr
+        for e in range(self.epoch):
+            if e % 50 == 0:
+                self.lr = self.lr / 10
+                for param_group in self.optimizer.param_groups:
+                    param_group['lr'] = self.lr
+            loss = self.iteration(train_data_iter, pre_train=pre_train, train=True)
+            test_loss = self.iteration(test_data_iter, pre_train=pre_train, train=False)
+            train_message = 'Epoch {} : '.format(e + 1) + \
+                            'Train Loss = {:.5f} '.format(loss) + \
+                            'Test Loss = {:.5f} '.format(test_loss) + \
+                            'lr = {} '.format(self.lr)
+            logging.info(train_message)
+            print(train_message)
+            if e % 10 == 0 and loss < self.min_loss:
+                torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
+                torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
+
     def train(self):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
@@ -95,40 +115,8 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
-        for e in range(self.epoch):
-            if e % 50 == 0:
-                self.lr = self.lr / 10
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] = self.lr
-            loss = self.iteration(train_data_iter, pre_train=True, train=True)
-            test_loss = self.iteration(test_data_iter, pre_train=True, train=False)
-            train_message = 'Epoch {} : '.format(e + 1) + \
-                            'Train Loss = {:.5f} '.format(loss) + \
-                            'Test Loss = {:.5f} '.format(test_loss) + \
-                            'lr = {} '.format(self.lr)
-            logging.info(train_message)
-            print(train_message)
-            if e % 10 == 0 and loss < self.min_loss:
-                torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
-                torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
-        self.lr = 0.001
-        for e in range(self.epoch):
-            if e % 50 == 0:
-                self.lr = self.lr / 10
-                for param_group in self.optimizer.param_groups:
-                    param_group['lr'] = self.lr
-            loss = self.iteration(train_data_iter, pre_train=False, train=True)
-            test_loss = self.iteration(test_data_iter, pre_train=False, train=False)
-            train_message = 'Epoch {} : '.format(e + 1) + \
-                            'Train Loss = {:.5f} '.format(loss) + \
-                            'Test Loss = {:.5f} '.format(test_loss) + \
-                            'lr = {} '.format(self.lr)
-            logging.info(train_message)
-            print(train_message)
-            if e % 10 == 0 and loss < self.min_loss:
-                torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
-                torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
-
+        self.step_train(train_data_iter, test_data_iter, pre_train=True)
+        self.step_train(train_data_iter, test_data_iter, pre_train=False)
         print("Training COMPLETE")
 
     def test(self):
