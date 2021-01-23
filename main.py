@@ -30,7 +30,8 @@ args = parser.parse_args()
 if __name__ == "__main__":
     if args.data_preprocess != "":
         data_preprocess(args.data_preprocess)
-    model = initialization(args.epoch, args.batch_size, args.data_root, args.save_path, args.load_path, args.cache)
+    model = initialization(epoch=args.epoch, batch_size=args.batch_size, data_root=args.data_root,
+                           save_path=args.save_path, load_path=args.load_path, cache=args.cache, train=args.train)
     if args.train is True:
         model.train()
     if args.test:

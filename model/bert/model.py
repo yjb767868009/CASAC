@@ -127,7 +127,11 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
-        loss = self.iteration(data_iter, False)
+        loss, next_loss, mask_loss = self.iteration(data_iter, False)
+        message = 'Train Loss = {:.5f} '.format(loss) + \
+                  'Train Next Loss = {:.5f} '.format(next_loss) + \
+                  'Train Mask Loss = {:.5f} '.format(mask_loss)
+        print(message)
 
     def iteration(self, data_iter, train=True):
         loss_list = []
