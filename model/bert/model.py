@@ -70,8 +70,8 @@ class Model(object):
         self.optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'optimizer.pth')))
         print('Loading param complete')
 
-    def forward(self, x, x_length=None, train=True):
-        return self.model(x, x_length, train)
+    def forward(self, x, x_length=None, pre_train=True):
+        return self.model(x, x_length, pre_train)
 
     def train(self):
         logging.basicConfig(level=logging.INFO,
@@ -100,15 +100,28 @@ class Model(object):
                 self.lr = self.lr / 10
                 for param_group in self.optimizer.param_groups:
                     param_group['lr'] = self.lr
-            loss, next_loss, mask_loss = self.iteration(train_data_iter, True)
-            test_loss, test_next_loss, test_mask_loss = self.iteration(test_data_iter, False)
+            loss = self.iteration(train_data_iter, pre_train=True, train=True)
+            test_loss = self.iteration(test_data_iter, pre_train=True, train=False)
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
-                            'Train Next Loss = {:.5f} '.format(next_loss) + \
-                            'Train Mask Loss = {:.5f} '.format(mask_loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
-                            'Test Next Loss = {:.5f} '.format(test_next_loss) + \
-                            'Test Mask Loss = {:.5f} '.format(test_mask_loss) + \
+                            'lr = {} '.format(self.lr)
+            logging.info(train_message)
+            print(train_message)
+            if e % 10 == 0 and loss < self.min_loss:
+                torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
+                torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
+        self.lr = 0.001
+        for e in range(self.epoch):
+            if e % 50 == 0:
+                self.lr = self.lr / 10
+                for param_group in self.optimizer.param_groups:
+                    param_group['lr'] = self.lr
+            loss = self.iteration(train_data_iter, pre_train=False, train=True)
+            test_loss = self.iteration(test_data_iter, pre_train=False, train=False)
+            train_message = 'Epoch {} : '.format(e + 1) + \
+                            'Train Loss = {:.5f} '.format(loss) + \
+                            'Test Loss = {:.5f} '.format(test_loss) + \
                             'lr = {} '.format(self.lr)
             logging.info(train_message)
             print(train_message)
@@ -133,26 +146,22 @@ class Model(object):
                   'Train Mask Loss = {:.5f} '.format(mask_loss)
         print(message)
 
-    def iteration(self, data_iter, train=True):
+    def iteration(self, data_iter, pre_train=True, train=True):
         loss_list = []
-        next_loss_list = []
-        mask_loss_list = []
         for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 input_random = input_random.cuda()
                 label = label.cuda()
             self.optimizer.zero_grad()
-
-            next_sent_output, mask_lm_output = self.model(input_random, data_length)
+            output = self.model(input_random, data_length)
 
             # loss
-            next_loss = self.mask_loss(next_sent_output, label, data_length)
-            mask_loss = self.mask_loss(mask_lm_output, input, data_length)
-            loss = next_loss + mask_loss
+            if pre_train:
+                loss = self.mask_loss(output, input, data_length)
+            else:
+                loss = self.mask_loss(output, label, data_length)
 
-            next_loss_list.append(next_loss.item())
-            mask_loss_list.append(mask_loss.item())
             loss_list.append(loss.item())
 
             if train:
@@ -160,6 +169,4 @@ class Model(object):
                 self.optimizer.step()
 
         avg_loss = np.asarray(loss_list).mean()
-        avg_next_loss = np.asarray(next_loss_list).mean()
-        avg_mask_loss = np.asarray(mask_loss_list).mean()
-        return avg_loss, avg_next_loss, avg_mask_loss
+        return avg_loss

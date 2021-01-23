@@ -24,7 +24,7 @@ class BERTLM(nn.Module):
     def forward(self, x, data_length, train=True):
         x = self.bert(x, data_length)
         if train:
-            return self.next_sentence(x, data_length), self.mask_lm(x, data_length)
+            return self.mask_lm(x, data_length)
         else:
             return self.next_sentence(x, data_length)
 
