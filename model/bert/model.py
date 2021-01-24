@@ -142,7 +142,7 @@ class Model(object):
                 input_random = input_random.cuda()
                 label = label.cuda()
             self.optimizer.zero_grad()
-            output = self.model(input_random, data_length)
+            output = self.model(input_random, data_length,pre_train)
 
             # loss
             if pre_train:
