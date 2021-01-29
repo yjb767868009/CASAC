@@ -4,45 +4,52 @@ plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
 
 
-def draw_base_loss(file_path):
+def draw_pretrain_loss(file_path):
     file = open(file_path, "r")
-    loss = []
+    train_loss = []
+    test_loss = []
     while True:
         data_line = file.readline()
         if data_line == "":
             break
         x = [a for a in data_line.split(" ")]
-        loss.append(float(x[9]))
-    x = [i for i in range(len(loss))]
-    plt.plot(x, loss)
+        if "Loss" not in x:
+            continue
+        train_loss.append(float(x[9]))
+        test_loss.append(float(x[13]))
+    x = [i for i in range(len(train_loss))]
+    plt.plot(x, train_loss, label="train loss")
+    plt.plot(x, test_loss, label="test loss")
 
-    plt.title("RNN模型Loss", fontsize=24)
+    plt.title("Pretrain Loss", fontsize=24)
     plt.xlabel("Epoch", fontsize=16)
     plt.ylabel("Loss", fontsize=16)
+    plt.legend(fontsize=16)
     plt.show()
 
-
-def draw_gan_loss(file_path):
+def draw_train_loss(file_path):
     file = open(file_path, "r")
-    refiner_loss = []
-    discriminative_loss = []
+    train_loss = []
+    test_loss = []
     while True:
         data_line = file.readline()
         if data_line == "":
             break
         x = [a for a in data_line.split(" ")]
-        refiner_loss.append(float(x[9]))
-        discriminative_loss.append(float(x[13]))
-    x = [i for i in range(len(refiner_loss))]
-    plt.plot(x, refiner_loss, label="Refiner Loss")
-    plt.plot(x, discriminative_loss, label="Discriminative Loss")
+        if "Loss" not in x:
+            continue
+        train_loss.append(float(x[9]))
+        test_loss.append(float(x[13]))
+    x = [i for i in range(len(train_loss))]
+    plt.plot(x, train_loss, label="train loss")
+    plt.plot(x, test_loss, label="test loss")
 
-    plt.title("GAN模型Loss", fontsize=24)
+    plt.title("Train Loss", fontsize=24)
     plt.xlabel("Epoch", fontsize=16)
     plt.ylabel("Loss", fontsize=16)
-    plt.legend(prop={"size": 16})
+    plt.legend(fontsize=16)
     plt.show()
-
 
 if __name__ == '__main__':
-    draw_base_loss("E:/rnn_log.txt")
+    draw_pretrain_loss("D:/NSM/log1.txt")
+    draw_train_loss("D:/NSM/log2.txt")
