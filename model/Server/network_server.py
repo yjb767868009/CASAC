@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import numpy as np
 import torch
@@ -28,7 +29,10 @@ class Server(object):
             data_length = self.data.size(0)
             if data_length >= 100:
                 self.full = True
+        t1=datetime.now()
         data = self.model.forward(self.data.unsqueeze(0), [data_length], train=False)
+        t2=datetime.now()
+        print(t2-t1)
         data = data[0][-1].cpu().detach().numpy()
         data = data * self.output_std + self.output_mean
         return data.tolist()
