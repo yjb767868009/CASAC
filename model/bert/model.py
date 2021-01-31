@@ -56,11 +56,40 @@ class Model(object):
         self.min_loss = 99
 
     def mask_loss(self, x, y, data_length):
+        """
+        Calculate the loss of the square difference of all data
+
+        :param x: output from model
+        :param y: label from database
+        :param data_length: data length difference
+        """
         mask = torch.zeros_like(x).float()
         for i in range(len(mask)):
             mask[i][:data_length[i]] = 1
         x = x * mask
         loss = torch.mean(torch.pow((x - y), 2))
+        return loss
+
+    def mask_last_loss(self, x, y, data_length):
+        """
+        Calculate the loss of the square difference of the last digit of all data
+
+        :param x: output from model
+        :param y: label from database
+        :param data_length: data length difference
+        """
+        batch_size = x.size(0)
+        mask = torch.zeros_like(x).float()
+        for i in range(batch_size):
+            mask[i][:data_length[i]] = 1
+        x = x * mask
+        all_loss = torch.zeros(1)
+        if torch.cuda.is_available():
+            all_loss = all_loss.cuda()
+        for i in range(batch_size):
+            loss = torch.mean(torch.pow((x[i, data_length[i] - 1, :] - y[i, data_length[i] - 1, :]), 2))
+            all_loss += loss
+        loss = all_loss / batch_size
         return loss
 
     def load_param(self):
@@ -148,7 +177,7 @@ class Model(object):
             if pre_train:
                 loss = self.mask_loss(output, input, data_length)
             else:
-                loss = self.mask_loss(output, label, data_length)
+                loss = self.mask_last_loss(output, label, data_length)
 
             loss_list.append(loss.item())
 
