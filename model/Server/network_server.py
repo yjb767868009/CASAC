@@ -14,8 +14,8 @@ class Server(object):
         self.model.load_param()
         self.data = torch.empty(0, 5307)
         self.full = False
-        self.input_mean, self.input_std = get_norm("E:/NSM/data2/InputNorm.txt")
-        self.output_mean, self.output_std = get_norm("E:/NSM/data2/OutputNorm.txt")
+        self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
+        self.output_mean, self.output_std = get_norm("E:/NSM/data/OutputNorm.txt")
 
     def forward(self, x):
         x = np.array(x)
@@ -29,10 +29,10 @@ class Server(object):
             data_length = self.data.size(0)
             if data_length >= 100:
                 self.full = True
-        t1=datetime.now()
+        # t1=datetime.now()
         data = self.model.forward(self.data.unsqueeze(0), [data_length], pre_train=False)
-        t2=datetime.now()
-        print(t2-t1)
+        # t2=datetime.now()
+        # print(t2-t1)
         data = data[0][-1].cpu().detach().numpy()
         data = data * self.output_std + self.output_mean
         return data.tolist()
