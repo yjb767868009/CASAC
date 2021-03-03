@@ -93,7 +93,7 @@ class Model(object):
                 torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
                 torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
 
-    def train(self):
+    def train(self, pretrain=True):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
@@ -115,7 +115,8 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
-        self.step_train(train_data_iter, test_data_iter, pre_train=True)
+        if pretrain:
+            self.step_train(train_data_iter, test_data_iter, pre_train=True)
         self.step_train(train_data_iter, test_data_iter, pre_train=False)
         print("Training COMPLETE")
 
