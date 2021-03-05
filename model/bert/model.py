@@ -116,8 +116,15 @@ class Model(object):
             collate_fn=collate_fn,
         )
         if pretrain:
+            print("Pretraining START")
+            logging.info("Pretraining START")
             self.step_train(train_data_iter, test_data_iter, pre_train=True)
+            print("Pretraining COMPLETE")
+            logging.info("Pretraining COMPLETE")
+        print("Training START")
+        logging.info("Training START")
         self.step_train(train_data_iter, test_data_iter, pre_train=False)
+        logging.info("Training COMPLETE")
         print("Training COMPLETE")
 
     def test(self):
