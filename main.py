@@ -33,7 +33,7 @@ if __name__ == "__main__":
         data_preprocess(args.data_preprocess)
     model = initialization(epoch=args.epoch, batch_size=args.batch_size, data_root=args.data_root,
                            save_path=args.save_path, load_path=args.load_path, cache=args.cache, train=args.train)
-    if args.train is True:
-        model.train(args.pretrain)
+    if args.train or args.pretrain:
+        model.train(args.train, args.pretrain)
     if args.test:
         model.test()
