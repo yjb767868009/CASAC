@@ -46,13 +46,13 @@ def data_preprocess(root_dir):
         if sequences_data == '':
             break
         sequences_index = int(sequences_data) - 1
-        if length >= 150:
+        if length >= 30:
             print("OVERSIZE SPILT")
-            save_data(save_index, write_input_list[:100], write_output_list[:100])
+            save_data(save_index, write_input_list[:20], write_output_list[:20])
             save_index += 1
-            write_input_list = write_input_list[100:]
-            write_output_list = write_output_list[100:]
-            length = length - 100
+            write_input_list = write_input_list[20:]
+            write_output_list = write_output_list[20:]
+            length = length - 20
         if index != sequences_index:
             save_data(save_index, write_input_list, write_output_list)
             save_index += 1
@@ -115,6 +115,6 @@ def divide_train_test(root_dir, scale):
 
 
 if __name__ == '__main__':
-    # data_preprocess("/home/yujubo/disk/data")
+    data_preprocess("/home/yujubo/disk/data")
     divide_train_test("/home/yujubo/disk/data", 0.1)
     # divide_train_test("E:/NSM/data", 0.1)
