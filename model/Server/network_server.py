@@ -24,10 +24,10 @@ class Server(object):
         self.data = torch.cat((self.data, x), 0)
         if self.full is True:
             self.data = self.data[1:]
-            data_length = 100
+            data_length = 20
         else:
             data_length = self.data.size(0)
-            if data_length >= 100:
+            if data_length >= 20:
                 self.full = True
         # t1=datetime.now()
         data = self.model.forward(self.data.unsqueeze(0), [data_length], pre_train=False)
