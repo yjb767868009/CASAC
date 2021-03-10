@@ -3,6 +3,7 @@ from datetime import datetime
 
 import numpy as np
 import torch
+import csv
 
 from model.utils.data_preprocess import get_norm
 from model.utils.initialization import initialization
@@ -16,6 +17,7 @@ class Server(object):
         self.full = False
         self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
         self.output_mean, self.output_std = get_norm("E:/NSM/data/OutputNorm.txt")
+        self.csv_writer = csv.writer(open('test.csv', 'w', newline=""))
 
     def forward(self, x):
         x = np.array(x)
@@ -35,4 +37,5 @@ class Server(object):
         # print(t2-t1)
         data = data[0][-1].cpu().detach().numpy()
         data = data * self.output_std + self.output_mean
+        self.csv_writer.writerow(data)
         return data.tolist()
