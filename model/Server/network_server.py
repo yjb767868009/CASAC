@@ -18,6 +18,7 @@ class Server(object):
         self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
         self.output_mean, self.output_std = get_norm("E:/NSM/data/OutputNorm.txt")
         self.csv_writer = csv.writer(open('test.csv', 'w', newline=""))
+        self.csv_writer.writerow([i for i in range(618)])
 
     def forward(self, x):
         x = np.array(x)
