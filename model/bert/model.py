@@ -149,12 +149,13 @@ class Model(object):
                 input_random = input_random.cuda()
                 label = label.cuda()
             self.optimizer.zero_grad()
-            output = self.model(input_random, data_length, pre_train)
 
             # loss
             if pre_train:
+                output = self.model(input_random, data_length, pre_train)
                 loss = self.mask_loss(output, input, data_length)
             else:
+                output = self.model(input, data_length, pre_train)
                 loss = self.mask_loss(output, label, data_length)
 
             loss_list.append(loss.item())
