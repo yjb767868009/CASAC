@@ -23,7 +23,7 @@ class Model(object):
                  # For encoder network information
                  encoder_nums, encoder_dims, encoder_activations, encoder_dropout,
                  # For BERT network information
-                 mid, hidden, n_layers, attn_heads, bert_dropout,
+                 mid, hidden, n_layers, attn_heads, bert_dropout, lm_dropout,
                  # For Model base information
                  epoch, batch_size, segmentation, lr,
                  ):
@@ -38,7 +38,7 @@ class Model(object):
 
         self.bert = BERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
                          mid, n_layers, attn_heads, bert_dropout, )
-        self.model = BERTLM(self.bert, mid, hidden)
+        self.model = BERTLM(self.bert, mid, hidden, lm_dropout)
 
         # Distributed GPU training if CUDA can detect more than 1 GPU
         if torch.cuda.is_available():
