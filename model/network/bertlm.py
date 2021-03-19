@@ -10,10 +10,9 @@ class BERTLM(nn.Module):
     Next Sentence Prediction Model + Masked Language Model
     """
 
-    def __init__(self, bert: BERT, input_dim=1280, hidden=1024, output_dim=618, dropout=0.1):
+    def __init__(self, bert: BERT, input_dim=1280, hidden=1024, dropout=0.1):
         """
         :param bert: BERT model which should be trained
-        :param vocab_size: total vocab size for masked_lm
         """
 
         super().__init__()

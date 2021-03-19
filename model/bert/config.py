@@ -20,4 +20,5 @@ conf = {
     'n_layers': 8,
     'attn_heads': 8,
     'bert_dropout': 0.1,
+    'lm_dropout': 0.1,
 }
