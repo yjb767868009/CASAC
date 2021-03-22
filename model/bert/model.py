@@ -11,8 +11,9 @@ import torch.utils.cpp_extension
 import torch.utils.data as tordata
 import torch.nn.utils.rnn as rnn_utils
 from model.network import *
+from model.utils.Loss import *
 from model.network.bert import BERT
-from model.network.bertlm import BERTLM
+from model.network.BERTAM import BERTAM
 from model.utils.collate_fn import collate_fn
 
 
@@ -38,7 +39,7 @@ class Model(object):
 
         self.bert = BERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
                          mid, n_layers, attn_heads, bert_dropout, )
-        self.model = BERTLM(self.bert, mid, hidden, lm_dropout)
+        self.model = BERTAM(self.bert, mid, hidden, lm_dropout)
 
         # Distributed GPU training if CUDA can detect more than 1 GPU
         if torch.cuda.is_available():
@@ -52,45 +53,7 @@ class Model(object):
         self.optimizer = optim.AdamW(self.model.parameters(), lr=self.lr)
 
         # build loss function
-        self.loss_function = self.mask_loss
         self.min_loss = 99
-
-    def mask_loss(self, x, y, data_length):
-        """
-        Calculate the loss of the square difference of all data
-
-        :param x: output from model
-        :param y: label from database
-        :param data_length: data length difference
-        """
-        mask = torch.zeros_like(x).float()
-        for i in range(len(mask)):
-            mask[i][:data_length[i]] = 1
-        x = x * mask
-        loss = torch.mean(torch.pow((x - y), 2))
-        return loss
-
-    def mask_last_loss(self, x, y, data_length):
-        """
-        Calculate the loss of the square difference of the last digit of all data
-
-        :param x: output from model
-        :param y: label from database
-        :param data_length: data length difference
-        """
-        batch_size = x.size(0)
-        mask = torch.zeros_like(x).float()
-        for i in range(batch_size):
-            mask[i][:data_length[i]] = 1
-        x = x * mask
-        all_loss = torch.zeros(1)
-        if torch.cuda.is_available():
-            all_loss = all_loss.cuda()
-        for i in range(batch_size):
-            loss = torch.mean(torch.pow((x[i, data_length[i] - 1, :] - y[i, data_length[i] - 1, :]), 2))
-            all_loss += loss
-        loss = all_loss / batch_size
-        return loss
 
     def load_param(self):
         print('Loading parm...')
@@ -118,16 +81,18 @@ class Model(object):
                             'lr = {} '.format(self.lr)
             logging.info(train_message)
             print(train_message)
-            if e % 10 == 0 and loss < self.min_loss:
-                torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
-                torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
+            if (e + 1) % 10 == 0 and loss < self.min_loss:
+                self.save()
+
+    def save(self):
+        torch.save(self.model.state_dict(), os.path.join(self.save_path, "model.pth"))
+        torch.save(self.optimizer.state_dict(), os.path.join(self.save_path, "optimizer.pth"))
 
     def train(self, train=True, pretrain=True):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
         logging.info(self.model)
-        print("Training")
         self.model.train()
 
         train_data_iter = tordata.DataLoader(
@@ -182,10 +147,10 @@ class Model(object):
             # loss
             if pre_train:
                 output = self.model(input_random, data_length, pre_train)
-                loss = self.mask_loss(output, input, data_length)
+                loss = mask_loss(output, input, data_length)
             else:
                 output = self.model(input, data_length, pre_train)
-                loss = self.mask_last_loss(output, label, data_length)
+                loss = mask_last_loss(output, label, data_length)
 
             loss_list.append(loss.item())
 
