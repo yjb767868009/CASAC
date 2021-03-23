@@ -15,10 +15,8 @@ conf = {
                             ['elu', 'elu']],
     'encoder_dropout': 0.1,
 
-    'mid': 1280,
-    'hidden': 1024,
+    'mid_dims': 1280,
     'n_layers': 8,
     'attn_heads': 8,
     'bert_dropout': 0.1,
-    'lm_dropout': 0.1,
 }

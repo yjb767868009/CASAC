@@ -1,18 +1,11 @@
 import argparse
 
-import torch.utils
-import torch.utils.cpp_extension
-
 from model.bert.model import Model
 from model.utils.data_preprocess import data_preprocess
 
 # Check GPU available
 from model.utils.initialization import initialization
 
-if torch.cuda.is_available():
-    print("CUDA_HOME:", torch.utils.cpp_extension.CUDA_HOME)
-    print("torch cuda version:", torch.version.cuda)
-    print("cuda is available:", torch.cuda.is_available())
 
 parser = argparse.ArgumentParser(description="Train")
 parser.add_argument("--cache", help="cache: if set as TRUE all the training data will be loaded at once"
