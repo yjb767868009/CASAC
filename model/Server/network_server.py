@@ -33,7 +33,7 @@ class Server(object):
             if data_length >= 20:
                 self.full = True
         # t1=datetime.now()
-        data = self.model.forward(self.data.unsqueeze(0), [data_length], pre_train=False)
+        data = self.model.forward(self.data.unsqueeze(0), [data_length])
         # t2=datetime.now()
         # print(t2-t1)
         data = data[0][-1].cpu().detach().numpy()

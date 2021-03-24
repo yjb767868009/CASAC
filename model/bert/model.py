@@ -11,7 +11,7 @@ import torch.utils.cpp_extension
 import torch.utils.data as tordata
 import torch.nn.utils.rnn as rnn_utils
 from model.network import *
-from model.utils.GPU_tools import model2gpu
+from model.utils.GPU_tools import *
 from model.utils.Loss import *
 from model.network.bert import BERT
 from model.network.BERTPredictionModel import BERTPredictionModel
@@ -44,11 +44,14 @@ class Model(object):
                          mid_dims, n_layers, attn_heads, bert_dropout, )
         self.pretrain_model = BERTPretrainModel()
         self.prediction_model = BERTPredictionModel()
-        # self.phase_prediction_model = FullConnectionModule(phase_n_layers, phase_dims, phase_activations, phase_dropout)
+        self.phase_prediction_model = PhasePredictionModel()
+        self.contact_prediction_model = ContactPredictionModel()
 
         self.bert = model2gpu(self.bert)
         self.pretrain_model = model2gpu(self.pretrain_model)
         self.prediction_model = model2gpu(self.prediction_model)
+        self.phase_prediction_model = model2gpu(self.phase_prediction_model)
+        self.contact_prediction_model = model2gpu(self.contact_prediction_model)
 
         # build optimizer
         self.base_lr = lr
@@ -56,6 +59,8 @@ class Model(object):
         self.bert_optimizer = optim.AdamW(self.bert.parameters(), lr=self.lr)
         self.pretrain_optimizer = optim.AdamW(self.pretrain_model.parameters(), lr=self.lr)
         self.prediction_optimizer = optim.AdamW(self.prediction_model.parameters(), lr=self.lr)
+        self.phase_prediction_optimizer = optim.AdamW(self.phase_prediction_model.parameters(), lr=self.lr)
+        self.contact_prediction_optimizer = optim.AdamW(self.contact_prediction_model.parameters(), lr=self.lr)
 
     def load_param(self):
         print('Loading parm...')
@@ -63,10 +68,18 @@ class Model(object):
         self.bert.load_state_dict(torch.load(os.path.join(self.load_path, 'bert.pth')))
         self.pretrain_model.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_model.pth')))
         self.prediction_model.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_model.pth')))
+        self.phase_prediction_model.load_state_dict(
+            torch.load(os.path.join(self.load_path, 'phase_prediction_model.pth')))
+        self.contact_prediction_model.load_state_dict(
+            torch.load(os.path.join(self.load_path, 'contact_prediction_model.pth')))
         # Load optimizer
         self.bert_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'bert_optimizer.pth')))
-        self.pretrain_model.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_model.pth')))
-        self.prediction_model.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_model.pth')))
+        self.pretrain_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_optimizer.pth')))
+        self.prediction_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_optimizer.pth')))
+        self.phase_prediction_optimizer.load_state_dict(
+            torch.load(os.path.join(self.load_path, 'phase_prediction_optimizer.pth')))
+        self.contact_prediction_optimizer.load_state_dict(
+            torch.load(os.path.join(self.load_path, 'contact_prediction_optimizer.pth')))
         print('Loading param complete')
 
     def save(self):
@@ -74,33 +87,48 @@ class Model(object):
         torch.save(self.bert.state_dict(), os.path.join(self.save_path, "bert.pth"))
         torch.save(self.pretrain_model.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
         torch.save(self.prediction_model.state_dict(), os.path.join(self.save_path, "prediction_model.pth"))
+        torch.save(self.phase_prediction_model.state_dict(), os.path.join(self.save_path, "phase_prediction_model.pth"))
+        torch.save(self.contact_prediction_model.state_dict(),
+                   os.path.join(self.save_path, "contact_prediction_model.pth"))
         # Save optimizer
         torch.save(self.bert_optimizer.state_dict(), os.path.join(self.save_path, "bert_optimizer.pth"))
-        torch.save(self.pretrain_model.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
-        torch.save(self.prediction_model.state_dict(), os.path.join(self.save_path, "prediction_model.pth"))
+        torch.save(self.pretrain_optimizer.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
+        torch.save(self.prediction_optimizer.state_dict(), os.path.join(self.save_path, "prediction_model.pth"))
+        torch.save(self.phase_prediction_optimizer.state_dict(), os.path.join(self.save_path, "prediction_model.pth"))
+        torch.save(self.contact_prediction_optimizer.state_dict(),
+                   os.path.join(self.save_path, "contact_prediction_optimizer.pth"))
 
-    def forward(self, x, x_length=None, pre_train=True):
+    def forward(self, x, x_length=None):
         x = self.bert(x, x_length)
-        if pre_train:
-            return self.pretrain_model(x, x_length, pre_train)
-        else:
-            return self.prediction_model(x, x_length, pre_train)
+        y = self.prediction_model(x, x_length)
+        phase = self.phase_prediction_model(x, x_length)
+        contact = self.contact_prediction_model(x, x_length)
+        output = torch.cat([y[:606], contact, phase])
+        return output
 
-    def step_train(self, train_data_iter, test_data_iter, pre_train=False):
+    def step_train(self, train_data_iter, test_data_iter, train_type):
         self.lr = self.base_lr
         for e in range(self.epoch):
             if e % 50 == 0:
                 self.lr = self.lr / 10
-                for param_group in self.bert_optimizer.param_groups:
-                    param_group['lr'] = self.lr
-                if pre_train:
+                if train_type == "pretrain":
+                    for param_group in self.bert_optimizer.param_groups:
+                        param_group['lr'] = self.lr
                     for param_group in self.pretrain_optimizer.param_groups:
                         param_group['lr'] = self.lr
-                else:
-                    for param_group in self.prediction_optimizer.param_groups:
+                if train_type == "prediction":
+                    for param_group in self.bert_optimizer.param_groups:
                         param_group['lr'] = self.lr
-            loss = self.iteration(train_data_iter, pre_train=pre_train, train=True)
-            test_loss = self.iteration(test_data_iter, pre_train=pre_train, train=False)
+                    for param_group in self.pretrain_optimizer.param_groups:
+                        param_group['lr'] = self.lr
+                if train_type == "phase_prediction":
+                    for param_group in self.phase_prediction_optimizer.param_groups:
+                        param_group['lr'] = self.lr
+                if train_type == "contact_prediction":
+                    for param_group in self.contact_prediction_optimizer.param_groups:
+                        param_group['lr'] = self.lr
+            loss = self.iteration(train_data_iter, train_type)
+            test_loss = self.iteration(test_data_iter, train_type)
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
@@ -110,13 +138,14 @@ class Model(object):
             if (e + 1) % 10 == 0:
                 self.save()
 
-    def train(self, train=True, pretrain=True):
+    def train(self, train=True, pretrain=True, phase_train=True, contact_train=True):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
         logging.info(self.bert)
         logging.info(self.pretrain_model)
         logging.info(self.prediction_model)
+        logging.info(self.phase_prediction_model)
 
         train_data_iter = tordata.DataLoader(
             dataset=self.train_source,
@@ -133,14 +162,22 @@ class Model(object):
             collate_fn=collate_fn,
         )
 
-        self.bert.train()
-        self.pretrain_model.train()
-        self.prediction_model.train()
-
         if pretrain:
-            self.step_train(train_data_iter, test_data_iter, pre_train=True)
+            self.bert.train()
+            self.pretrain_model.train()
+            self.step_train(train_data_iter, test_data_iter, train_type="pretrain")
         if train:
-            self.step_train(train_data_iter, test_data_iter, pre_train=False)
+            self.bert.train()
+            self.prediction_model.train()
+            self.step_train(train_data_iter, test_data_iter, train_type="prediction")
+        if phase_train:
+            self.bert.eval()
+            self.phase_prediction_model.train()
+            self.step_train(train_data_iter, test_data_iter, train_type="phase_prediction")
+        if contact_train:
+            self.bert.eval()
+            self.phase_prediction_model.train()
+            self.step_train(train_data_iter, test_data_iter, train_type="contact_prediction")
 
     def test(self):
         print("Testing")
@@ -151,44 +188,71 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
-        loss = self.iteration(data_iter, pre_train=False, train=False)
+        loss = self.iteration(data_iter, train_type="test")
         message = 'Loss = {:.5f} '.format(loss)
         print(message)
 
-    def iteration(self, data_iter, pre_train=True, train=True):
+    def iteration(self, data_iter, train_type):
         loss_list = []
         for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 input_random = input_random.cuda()
                 label = label.cuda()
-            if pre_train:
+            if train_type == "pretrain":
                 self.bert_optimizer.zero_grad()
                 self.pretrain_optimizer.zero_grad()
-            else:
+
+                output = self.bert(input_random, data_length)
+                output = self.pretrain_model(output, data_length)
+
+                loss = mask_loss(output, input, data_length)
+                loss_list.append(loss.item())
+                loss.backward()
+
+                self.bert_optimizer.step()
+                self.pretrain_optimizer.step()
+            if train_type == "prediction":
                 self.bert_optimizer.zero_grad()
                 self.prediction_model.zero_grad()
 
-            # loss
-            if pre_train:
-                output = self.bert(input_random, data_length)
-                output = self.pretrain_model(output, data_length)
-                loss = mask_loss(output, input, data_length)
-            else:
                 output = self.bert(input, data_length)
                 output = self.prediction_model(output, data_length)
+
                 loss = mask_last_loss(output, label, data_length)
-
-            loss_list.append(loss.item())
-
-            if train:
+                loss_list.append(loss.item())
                 loss.backward()
-                if pre_train:
-                    self.bert_optimizer.step()
-                    self.pretrain_optimizer.step()
-                else:
-                    self.bert_optimizer.step()
-                    self.prediction_optimizer.step()
+
+                self.bert_optimizer.step()
+                self.prediction_optimizer.step()
+
+            if train_type == "phase_prediction":
+                self.phase_prediction_model.zero_grad()
+
+                output = self.bert(input, data_length)
+                output = self.phase_prediction_model(output)
+
+                loss = mask_last_loss(output, label[:, :, 611:618], data_length)
+                loss_list.append(loss.item())
+                loss.backward()
+            if train_type == "contact_prediction":
+                self.contact_prediction_optimizer.zero_grad()
+
+                output = self.bert(input, data_length)
+                output = self.contact_prediction_model(output)
+
+                loss = mask_last_loss(output, label[:, :, 606:611], data_length)
+                loss_list.append(loss.item())
+                loss.backward()
+            if train_type == "test":
+                output = self.bert(input, data_length)
+                base = self.prediction_model(output, data_length)
+                contact = self.contact_prediction_model(output)
+                phase = self.phase_prediction_model(output)
+                output = torch.cat([base[:, :, :606], contact, phase], 2)
+
+                loss = mask_last_loss(output, label, data_length)
+                loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss

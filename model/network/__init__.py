@@ -5,3 +5,5 @@ from .attention import TransformerBlock
 from .FullConnectionModule import FullConnectionModule
 from .BERTPretrainModel import BERTPretrainModel
 from .BERTPredictionModel import BERTPredictionModel
+from .PhasePredictionModel import PhasePredictionModel
+from .ContactPredictionModel import ContactPredictionModel

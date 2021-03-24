@@ -114,7 +114,23 @@ def divide_train_test(root_dir, scale):
             shutil.copy(os.path.join(output_dir, file), os.path.join(train_output_dir, train_file))
 
 
+def read_input_file(root_dir):
+    input_file = open(os.path.join(root_dir, "Input.txt"), 'r')
+    while True:
+        input_data_str = input_file.readline()
+        input_data = [float(x) for x in input_data_str.split(' ')]
+
+
+def read_output_file(root_dir):
+    output_file = open(os.path.join(root_dir, "Output.txt"), 'r')
+    while True:
+        output_data_str = output_file.readline()
+        output_data = [float(x) for x in output_data_str.split(' ')]
+        print(output_data[611:618])
+
+
 if __name__ == '__main__':
-    data_preprocess("/home/yujubo/disk/data")
-    divide_train_test("/home/yujubo/disk/data", 0.1)
+    read_output_file("E:/NSM/data")
+    # data_preprocess("/home/yujubo/disk/data")
+    # divide_train_test("/home/yujubo/disk/data", 0.1)
     # divide_train_test("E:/NSM/data", 0.1)
