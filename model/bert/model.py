@@ -172,7 +172,7 @@ class Model(object):
 
     def iteration(self, data_iter, pre_train=True, train=True):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label), data_length in tqdm(data_iter, ncols=50):
             if torch.cuda.is_available():
                 input = input.cuda()
                 input_random = input_random.cuda()

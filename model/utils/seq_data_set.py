@@ -28,7 +28,7 @@ class DataSet(tordata.Dataset):
         return self.__getitem__(index)
 
     def load_all_data(self):
-        for i in tqdm(range(self.data_size), ncols=100):
+        for i in tqdm(range(self.data_size), ncols=50):
             self.load_data(i)
 
     def __len__(self):

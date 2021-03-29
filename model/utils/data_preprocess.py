@@ -101,7 +101,7 @@ def divide_train_test(root_dir, scale):
     assert data_size == len(os.listdir(output_dir)), "输入和输出文件数量不一致"
     random_list = random.sample(input_list, int(data_size * scale))
     random_size = 0
-    for i in tqdm(range(data_size), ncols=100):
+    for i in tqdm(range(data_size), ncols=50):
         file = input_list[i]
         test_file = str(random_size) + '.txt'
         train_file = str(i - random_size) + '.txt'
