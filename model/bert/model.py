@@ -127,7 +127,7 @@ class Model(object):
                     torch.save(self.pretrain_model.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
                     # Save optimizer
                     torch.save(self.bert_optimizer.state_dict(), os.path.join(self.save_path, "bert_optimizer.pth"))
-                    torch.save(self.pretrain_optimizer.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
+                    torch.save(self.pretrain_optimizer.state_dict(), os.path.join(self.save_path, "pretrain_optimizer.pth"))
                 if train_type == "prediction":
                     # Save Model
                     torch.save(self.bert.state_dict(), os.path.join(self.save_path, "bert.pth"))
@@ -135,14 +135,14 @@ class Model(object):
                     # Save optimizer
                     torch.save(self.bert_optimizer.state_dict(), os.path.join(self.save_path, "bert_optimizer.pth"))
                     torch.save(self.prediction_optimizer.state_dict(),
-                               os.path.join(self.save_path, "prediction_model.pth"))
+                               os.path.join(self.save_path, "prediction_optimizer.pth"))
                 if train_type == "phase_prediction":
                     # Save Model
                     torch.save(self.phase_prediction_model.state_dict(),
                                os.path.join(self.save_path, "phase_prediction_model.pth"))
                     # Save optimizer
                     torch.save(self.phase_prediction_optimizer.state_dict(),
-                               os.path.join(self.save_path, "prediction_model.pth"))
+                               os.path.join(self.save_path, "phase_prediction_optimizer.pth"))
 
                 if train_type == "contact_prediction":
                     # Save Model
