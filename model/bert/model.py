@@ -152,7 +152,7 @@ class Model(object):
                     torch.save(self.contact_prediction_optimizer.state_dict(),
                                os.path.join(self.save_path, "contact_prediction_optimizer.pth"))
 
-    def train(self, train=True, pretrain=True, phase_train=True, contact_train=True):
+    def train(self, train=True, pretrain=True, extra_train=True):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
@@ -184,13 +184,14 @@ class Model(object):
             self.bert.train()
             self.prediction_model.train()
             self.step_train(train_data_iter, test_data_iter, train_type="prediction")
-        if phase_train:
+        if extra_train:
+            # phase prediction train
             self.bert.eval()
             self.phase_prediction_model.train()
             self.step_train(train_data_iter, test_data_iter, train_type="phase_prediction")
-        if contact_train:
+            # contact prediction train
             self.bert.eval()
-            self.phase_prediction_model.train()
+            self.contact_prediction_model.train()
             self.step_train(train_data_iter, test_data_iter, train_type="contact_prediction")
 
     def test(self):
