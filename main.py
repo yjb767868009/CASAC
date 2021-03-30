@@ -29,6 +29,6 @@ if __name__ == "__main__":
     model = initialization(epoch=args.epoch, batch_size=args.batch_size, data_root=args.data_root,
                            save_path=args.save_path, load_path=args.load_path, cache=args.cache, train=args.train)
     if args.train or args.pretrain or args.extra_train:
-        model.train(args.train, args.pretrainm, args.extra_train)
+        model.train(args.train, args.pretrain, args.extra_train)
     if args.test:
         model.test()
