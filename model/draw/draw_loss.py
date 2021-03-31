@@ -51,5 +51,5 @@ def draw_train_loss(file_path):
     plt.show()
 
 if __name__ == '__main__':
-    draw_pretrain_loss("D:/NSM/log1.txt")
-    draw_train_loss("D:/NSM/log2.txt")
+    draw_pretrain_loss("E:/NSM/1.txt")
+    draw_train_loss("E:/NSM/2.txt")

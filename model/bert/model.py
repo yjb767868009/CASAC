@@ -62,26 +62,40 @@ class Model(object):
         self.phase_prediction_optimizer = optim.AdamW(self.phase_prediction_model.parameters(), lr=self.lr)
         self.contact_prediction_optimizer = optim.AdamW(self.contact_prediction_model.parameters(), lr=self.lr)
 
-    def load_param(self):
+    def load_param(self, type="test"):
         print('Loading parm...')
-        # Load Model
-        self.bert.load_state_dict(torch.load(os.path.join(self.load_path, 'bert.pth')))
-        self.pretrain_model.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_model.pth')))
-        self.prediction_model.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_model.pth')))
-        self.phase_prediction_model.load_state_dict(
-            torch.load(os.path.join(self.load_path, 'phase_prediction_model.pth')))
-        self.contact_prediction_model.load_state_dict(
-            torch.load(os.path.join(self.load_path, 'contact_prediction_model.pth')))
-        # Load optimizer
-        self.bert_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'bert_optimizer.pth')))
-        self.pretrain_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_optimizer.pth')))
-        self.prediction_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_optimizer.pth')))
-        self.phase_prediction_optimizer.load_state_dict(
-            torch.load(os.path.join(self.load_path, 'phase_prediction_optimizer.pth')))
-        self.contact_prediction_optimizer.load_state_dict(
-            torch.load(os.path.join(self.load_path, 'contact_prediction_optimizer.pth')))
+        if type == "test":
+            # Load Model
+            self.bert.load_state_dict(torch.load(os.path.join(self.load_path, 'bert.pth')))
+            self.prediction_model.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_model.pth')))
+            self.phase_prediction_model.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'phase_prediction_model.pth')))
+            self.contact_prediction_model.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'contact_prediction_model.pth')))
+            # Load optimizer
+            self.bert_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'bert_optimizer.pth')))
+            self.prediction_optimizer.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'prediction_optimizer.pth')))
+            self.phase_prediction_optimizer.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'phase_prediction_optimizer.pth')))
+            self.contact_prediction_optimizer.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'contact_prediction_optimizer.pth')))
+        if type == "train":
+            # Load Model
+            self.bert.load_state_dict(torch.load(os.path.join(self.load_path, 'bert.pth')))
+            self.pretrain_model.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_model.pth')))
+            # Load optimizer
+            self.bert_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'bert_optimizer.pth')))
+            self.pretrain_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'pretrain_optimizer.pth')))
+        if type == "extra_train":
+            # Load Model
+            self.bert.load_state_dict(torch.load(os.path.join(self.load_path, 'bert.pth')))
+            self.prediction_model.load_state_dict(torch.load(os.path.join(self.load_path, 'prediction_model.pth')))
+            # Load optimizer
+            self.bert_optimizer.load_state_dict(torch.load(os.path.join(self.load_path, 'bert_optimizer.pth')))
+            self.prediction_optimizer.load_state_dict(
+                torch.load(os.path.join(self.load_path, 'prediction_optimizer.pth')))
         print('Loading param complete')
-
 
     def forward(self, x, x_length=None):
         x = self.bert(x, x_length)
@@ -127,7 +141,8 @@ class Model(object):
                     torch.save(self.pretrain_model.state_dict(), os.path.join(self.save_path, "pretrain_model.pth"))
                     # Save optimizer
                     torch.save(self.bert_optimizer.state_dict(), os.path.join(self.save_path, "bert_optimizer.pth"))
-                    torch.save(self.pretrain_optimizer.state_dict(), os.path.join(self.save_path, "pretrain_optimizer.pth"))
+                    torch.save(self.pretrain_optimizer.state_dict(),
+                               os.path.join(self.save_path, "pretrain_optimizer.pth"))
                 if train_type == "prediction":
                     # Save Model
                     torch.save(self.bert.state_dict(), os.path.join(self.save_path, "bert.pth"))
@@ -181,10 +196,14 @@ class Model(object):
             self.pretrain_model.train()
             self.step_train(train_data_iter, test_data_iter, train_type="pretrain")
         if train:
+            if not pretrain:
+                self.load_param("train")
             self.bert.train()
             self.prediction_model.train()
             self.step_train(train_data_iter, test_data_iter, train_type="prediction")
         if extra_train:
+            if not train:
+                self.load_param("extra_train")
             # phase prediction train
             self.bert.eval()
             self.phase_prediction_model.train()
