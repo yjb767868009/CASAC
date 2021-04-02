@@ -214,6 +214,7 @@ class Model(object):
             self.step_train(train_data_iter, test_data_iter, train_type="contact_prediction")
 
     def test(self):
+        self.load_param("test")
         print("Testing")
         data_iter = tordata.DataLoader(
             dataset=self.test_source,
@@ -297,7 +298,6 @@ class Model(object):
 
                 loss = mask_last_loss(output, label, data_length)
                 loss_list.append(loss.item())
-
             if train_type == "base_test":
                 output = self.bert(input, data_length)
                 base = self.prediction_model(output, data_length)
