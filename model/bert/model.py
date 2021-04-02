@@ -222,8 +222,14 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
+        base_loss = self.iteration(data_iter, train_type="base_test")
+        contact_loss = self.iteration(data_iter, train_type="contact_test")
+        phase_loss = self.iteration(data_iter, train_type="phase_test")
         loss = self.iteration(data_iter, train_type="test")
-        message = 'Loss = {:.5f} '.format(loss)
+        message = 'base Loss = {:.5f} '.format(base_loss) + \
+                  'contact loss Loss = {:.5f} '.format(contact_loss) + \
+                  'phase loss Loss = {:.5f} '.format(phase_loss) + \
+                  'loss Loss = {:.5f} '.format(loss)
         print(message)
 
     def iteration(self, data_iter, train_type):
@@ -292,5 +298,20 @@ class Model(object):
                 loss = mask_last_loss(output, label, data_length)
                 loss_list.append(loss.item())
 
+            if train_type == "base_test":
+                output = self.bert(input, data_length)
+                base = self.prediction_model(output, data_length)
+                loss = mask_last_loss(base, label, data_length)
+                loss_list.append(loss.item())
+            if train_type == "contact_test":
+                output = self.bert(input, data_length)
+                contact = self.contact_prediction_model(output)
+                loss = mask_last_loss(contact, label[:, :, 606:611], data_length)
+                loss_list.append(loss.item())
+            if train_type == "phase_test":
+                output = self.bert(input, data_length)
+                contact = self.phase_prediction_model(output)
+                loss = mask_last_loss(contact, label[:, :, 611:618], data_length)
+                loss_list.append(loss.item())
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
