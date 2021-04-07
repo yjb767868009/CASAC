@@ -100,9 +100,9 @@ class Model(object):
     def forward(self, x, x_length=None):
         x = self.bert(x, x_length)
         y = self.prediction_model(x, x_length)
-        phase = self.phase_prediction_model(x, x_length)
-        contact = self.contact_prediction_model(x, x_length)
-        output = torch.cat([y[:606], contact, phase])
+        phase = self.phase_prediction_model(x)
+        contact = self.contact_prediction_model(x)
+        output = torch.cat([y[:, :, :606], contact, phase],2)
         return output
 
     def step_train(self, train_data_iter, test_data_iter, train_type):
