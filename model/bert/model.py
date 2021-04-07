@@ -242,9 +242,9 @@ class Model(object):
         contact_loss = self.iteration(data_iter, train_type="contact_test")
         phase_loss = self.iteration(data_iter, train_type="phase_test")
         message = 'base Loss = {:.5f} '.format(base_loss) + \
-                  'contact loss Loss = {:.5f} '.format(contact_loss) + \
-                  'phase loss Loss = {:.5f} '.format(phase_loss) + \
-                  'loss Loss = {:.5f} '.format(loss)
+                  'contact Loss = {:.5f} '.format(contact_loss) + \
+                  'phase Loss = {:.5f} '.format(phase_loss) + \
+                  'Loss = {:.5f} '.format(loss)
         print(message)
 
     def iteration(self, data_iter, train_type):
@@ -309,14 +309,6 @@ class Model(object):
                 contact = self.contact_prediction_model(output)
                 phase = self.phase_prediction_model(output)
                 output = torch.cat([base[:, :, :606], contact, phase], 2)
-                import csv
-                csv_writer = csv.writer(open('1.csv', 'w', newline=""))
-                csv_writer.writerow([i for i in range(618)])
-                csv_writer.writerow(output[0, 0, :].cpu().detach().numpy())
-                csv_writer = csv.writer(open('2.csv', 'w', newline=""))
-                csv_writer.writerow([i for i in range(618)])
-                csv_writer.writerow(label[0, 0, :].cpu().detach().numpy())
-                exit()
                 loss = mask_last_loss(output, label, data_length)
                 loss_list.append(loss.item())
             elif train_type == "base_test":
