@@ -1,8 +1,5 @@
 import torch.nn as nn
 
-from .bert import BERT
-import torch.nn.utils.rnn as rnn_utils
-
 
 class BERTPredictionModel(nn.Module):
     """

@@ -5,13 +5,13 @@ from model.network.Embedding import Embedding
 from model.network.attention.transformer import TransformerBlock
 
 
-class BERT(nn.Module):
+class KeyBERT(nn.Module):
     """
     BERT model : Bidirectional Encoder Representations from Transformers.
     """
 
-    def __init__(self, encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
-                 hidden= 1280, n_layers=16, attn_heads=16, dropout=0.1):
+    def __init__(self, embedding,
+                 hidden=1280, n_layers=16, attn_heads=16, dropout=0.1):
         """
         :param input_size: input_size
         :param hidden: BERT model hidden size
@@ -29,7 +29,7 @@ class BERT(nn.Module):
         self.feed_forward_hidden = hidden * 4
 
         # embedding for BERT, sum of positional, segment, token embeddings
-        self.embedding = Embedding(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation)
+        self.embedding = embedding
 
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
