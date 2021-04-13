@@ -46,13 +46,17 @@ class Model(object):
         self.motion_bert_pretrain = MotionBertPretrain(self.motion_bert, lr)
         self.motion_bert_prediction = MotionBertPrediction(self.motion_bert, lr)
 
+    def load_param(self, load_path):
+        self.key_bert_prediction.load_param(load_path)
+        self.motion_bert_prediction.load_param(load_path)
+
     def forward(self, x, x_length=None):
         key = self.key_bert_prediction.forward(x, x_length)
         return self.motion_bert_prediction.forward(key, x, x_length)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
-            if (e+1) % 50 == 0:
+            if (e + 1) % 50 == 0:
                 model.update_lr()
             loss = model.train(train_data_iter)
             test_loss = model.test(test_data_iter)
@@ -100,8 +104,7 @@ class Model(object):
     def test(self, load_path=""):
         print("Testing")
         if load_path != "":
-            self.key_bert_prediction.load_param(load_path)
-            self.motion_bert_prediction.load_param(load_path)
+            self.load_param(load_path)
         data_iter = tordata.DataLoader(
             dataset=self.test_source,
             batch_size=self.batch_size,
