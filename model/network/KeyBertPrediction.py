@@ -55,6 +55,21 @@ class KeyBertPrediction(BaseModel):
         for param_group in self.key_prediction_optimizer.param_groups:
             param_group['lr'] = self.lr
 
+    def test(self, data_iter):
+        loss_list = []
+        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+            if torch.cuda.is_available():
+                input = input.cuda()
+                # input_random = input_random.cuda()
+                label = label.cuda()
+
+            output = self.forward(input, data_length)
+            loss = mask_last_loss(output, label[:, :, 606:618], data_length)
+            loss_list.append(loss.item())
+
+        avg_loss = np.asarray(loss_list).mean()
+        return avg_loss
+
     def train(self, data_iter):
         loss_list = []
         for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
@@ -67,6 +82,7 @@ class KeyBertPrediction(BaseModel):
 
             output = self.forward(input, data_length)
             loss = mask_last_loss(output, label[:, :, 606:618], data_length)
+            loss_list.append(loss.item())
             loss.backward()
 
             self.key_bert_optimizer.step()

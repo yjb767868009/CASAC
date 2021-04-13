@@ -28,10 +28,10 @@ class BaseModel(object):
     def update_lr(self):
         pass
 
-    def test(self):
+    def train(self, data_iter):
         pass
 
-    def train(self, data_iter):
+    def test(self, data_iter):
         pass
 
     def forward(self, x, x_length):

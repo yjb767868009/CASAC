@@ -58,7 +58,7 @@ class Model(object):
             if (e+1) % 50 == 0:
                 model.update_lr()
             loss = model.train(train_data_iter)
-            test_loss = model.train(test_data_iter)
+            test_loss = model.test(test_data_iter)
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
@@ -100,8 +100,6 @@ class Model(object):
             self.step_train(self.key_bert_prediction, train_data_iter, test_data_iter)
 
     def test(self):
-        # self.load_param("test")
-
         print("Testing")
         data_iter = tordata.DataLoader(
             dataset=self.test_source,
@@ -110,8 +108,7 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
-        # message = 'base Loss = {:.5f} '.format(base_loss) + \
-        #           'contact Loss = {:.5f} '.format(contact_loss) + \
-        #           'phase Loss = {:.5f} '.format(phase_loss) + \
-        #           'Loss = {:.5f} '.format(loss)
-        # print(message)
+        self.motion_bert_prediction.test_init()
+        loss = self.motion_bert_prediction.test(data_iter)
+        message = 'Loss = {:.5f} '.format(loss)
+        print(message)

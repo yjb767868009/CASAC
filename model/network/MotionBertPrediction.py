@@ -79,6 +79,22 @@ class MotionBertPrediction(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
+    def test(self, data_iter):
+        loss_list = []
+        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+            if torch.cuda.is_available():
+                input = input.cuda()
+                # input_random = input_random.cuda()
+                label = label.cuda()
+
+            output = self.forward(input, data_length)
+            loss = mask_last_loss(output, label[:, :, :606], data_length)
+            loss_list.append(loss.item())
+            loss.backward()
+
+        avg_loss = np.asarray(loss_list).mean()
+        return avg_loss
+
     def forward(self, x, x_length):
         key = self.key_bert_prediction.forward(x, x_length)
         output = self.motion_bert(key, x, x_length)
