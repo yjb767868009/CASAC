@@ -33,6 +33,3 @@ class BaseModel(object):
 
     def test(self, data_iter):
         pass
-
-    def forward(self, x, x_length):
-        pass

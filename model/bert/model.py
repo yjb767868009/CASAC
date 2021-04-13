@@ -43,15 +43,12 @@ class Model(object):
 
         self.key_bert_pretrain = KeyBertPretrain(self.key_bert, lr)
         self.key_bert_prediction = KeyBertPrediction(self.key_bert, lr)
-        self.motion_bert_pretrain = MotionBertPretrain(self.key_bert, lr)
-        self.motion_bert_prediction = MotionBertPrediction(self.key_bert_prediction,self.key_bert, lr)
-
-    def load_param(self):
-        print('Loading param...')
-        print('Loading param complete')
+        self.motion_bert_pretrain = MotionBertPretrain(self.motion_bert, lr)
+        self.motion_bert_prediction = MotionBertPrediction(self.motion_bert, lr)
 
     def forward(self, x, x_length=None):
-        return self.motion_bert_prediction.forward(x, x_length)
+        key = self.key_bert_prediction.forward(x, x_length)
+        return self.motion_bert_prediction.forward(key, x, x_length)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
@@ -66,6 +63,7 @@ class Model(object):
             logging.info(train_message)
             print(train_message)
             if (e + 1) % 10 == 0:
+                print("saving")
                 model.save(self.save_path)
 
     def train(self, key_train=True, motion_train=True):
@@ -97,10 +95,13 @@ class Model(object):
             #self.motion_bert_pretrain.train_init()
             #self.step_train(self.motion_bert_pretrain, train_data_iter, test_data_iter)
             self.motion_bert_prediction.train_init()
-            self.step_train(self.key_bert_prediction, train_data_iter, test_data_iter)
+            self.step_train(self.motion_bert_prediction, train_data_iter, test_data_iter)
 
-    def test(self):
+    def test(self, load_path=""):
         print("Testing")
+        if load_path != "":
+            self.key_bert_prediction.load_param(load_path)
+            self.motion_bert_prediction.load_param(load_path)
         data_iter = tordata.DataLoader(
             dataset=self.test_source,
             batch_size=self.batch_size,
@@ -108,7 +109,10 @@ class Model(object):
             shuffle=True,
             collate_fn=collate_fn,
         )
+        self.key_bert_prediction.test_init()
+        key_loss = self.key_bert_prediction.test(data_iter)
         self.motion_bert_prediction.test_init()
-        loss = self.motion_bert_prediction.test(data_iter)
-        message = 'Loss = {:.5f} '.format(loss)
+        motion_loss = self.motion_bert_prediction.test(data_iter)
+        message = 'Key Loss = {:.5f} '.format(key_loss) + \
+                  'Motion Loss = {:.5f} '.format(motion_loss)
         print(message)

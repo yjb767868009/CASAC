@@ -101,8 +101,8 @@ class MotionBertPretrain(BaseModel):
 class MotionPretrain(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.start_layer = nn.Sequential(nn.Linear(1296, 2048), nn.ELU(), )
-        self.end_layer = nn.Sequential(nn.Linear(2048, 5307), )
+        self.start_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1296, 2048), nn.ELU(), )
+        self.end_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(2048, 5307), )
 
     def forward(self, x, x_length):
         x = self.start_layer(x)

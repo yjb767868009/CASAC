@@ -4,7 +4,6 @@ import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 
-from . import KeyBertPrediction
 from .BaseModel import BaseModel
 from model.utils import model2gpu
 from model.utils import mask_last_loss
@@ -16,9 +15,8 @@ class MotionBertPrediction(BaseModel):
     Prediction Animation motion feature
     """
 
-    def __init__(self, key_bert_prediction: KeyBertPrediction, motion_bert, lr):
+    def __init__(self, motion_bert, lr):
         super().__init__()
-        self.key_bert_prediction = key_bert_prediction
         self.motion_bert = model2gpu(motion_bert)
         self.motion_prediction = model2gpu(MotionPrediction())
         self.lr = lr
@@ -26,12 +24,10 @@ class MotionBertPrediction(BaseModel):
         self.motion_prediction_optimizer = torch.optim.AdamW(self.motion_prediction.parameters(), lr=self.lr)
 
     def train_init(self):
-        self.key_bert_prediction.test_init()
         self.motion_bert.train()
         self.motion_prediction.train()
 
     def test_init(self):
-        self.key_bert_prediction.test_init()
         self.motion_bert.eval()
         self.motion_prediction.eval()
 
@@ -70,8 +66,9 @@ class MotionBertPrediction(BaseModel):
             self.motion_bert_optimizer.zero_grad()
             self.motion_prediction_optimizer.zero_grad()
 
-            output = self.forward(input, data_length)
+            output = self.forward(label[:, :, 606:], input, data_length)
             loss = mask_last_loss(output, label[:, :, :606], data_length)
+            loss_list.append(loss.item())
             loss.backward()
 
             self.motion_bert_optimizer.step()
@@ -87,7 +84,7 @@ class MotionBertPrediction(BaseModel):
                 # input_random = input_random.cuda()
                 label = label.cuda()
 
-            output = self.forward(input, data_length)
+            output = self.forward(label[:, :, 606:], input, data_length)
             loss = mask_last_loss(output, label[:, :, :606], data_length)
             loss_list.append(loss.item())
             loss.backward()
@@ -95,20 +92,18 @@ class MotionBertPrediction(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self, x, x_length):
-        key = self.key_bert_prediction.forward(x, x_length)
+    def forward(self, key, x, x_length):
         output = self.motion_bert(key, x, x_length)
         output = self.motion_prediction(output, x_length)
-        output = torch.cat([output[:, :, :606], key], 2)
         return output
 
 
 class MotionPrediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.start_layer = nn.Sequential(nn.Linear(1280, 1024), nn.ELU(), )
-        self.mid_layer = nn.Sequential(nn.Linear(1024, 1024), nn.ELU(), )
-        self.end_layer = nn.Sequential(nn.Linear(1024, 606), )
+        self.start_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1296, 1024), nn.ELU(), )
+        self.mid_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1024, 1024), nn.ELU(), )
+        self.end_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1024, 606), )
 
     def forward(self, x, x_length):
         x = self.start_layer(x)

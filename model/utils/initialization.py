@@ -4,7 +4,7 @@ from model.bert.model import Model
 from model.bert.config import conf
 
 
-def initialization(epoch, batch_size, data_root, save_path, load_path, cache=True, train=True, unity=False):
+def initialization(epoch, batch_size, data_root="", save_path="", load_path="", cache=True, train=True, unity=False):
     print("Initializing model...")
     conf['epoch'] = epoch
     conf['batch_size'] = batch_size

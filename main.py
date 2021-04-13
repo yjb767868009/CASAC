@@ -23,10 +23,11 @@ args = parser.parse_args()
 if __name__ == "__main__":
     if args.data_preprocess != "":
         data_preprocess(args.data_preprocess)
+    train_flag = args.key_train or args.motion_train
     model = initialization(epoch=args.epoch, batch_size=args.batch_size, data_root=args.data_root,
                            save_path=args.save_path, load_path=args.load_path, cache=args.cache,
-                           train=(args.key_train or args.motion_train))
-    if args.key_train or args.motion_train:
+                           train=train_flag)
+    if train_flag:
         model.train(args.key_train, args.motion_train)
     if args.test:
-        model.test()
+        model.test(args.load_path if not train_flag else "")
