@@ -15,7 +15,8 @@ conf = {
                             ['elu', 'elu']],
     'encoder_dropout': 0.1,
 
-    'mid_dims': 1280,
+    'key_bert_hidden': 1280,
+    'motion_bert_hidden': 1296,
     'n_layers': 8,
     'attn_heads': 8,
     'bert_dropout': 0.1,
