@@ -63,7 +63,7 @@ class MotionBertPretrain(BaseModel):
                 input_random = input_random.cuda()
                 # label = label.cuda()
 
-            output = self.forward(input_random, data_length)
+            output = self.forward(label[:, :, 606:], input_random, data_length)
 
             loss = mask_loss(output, input, data_length)
             loss_list.append(loss.item())
@@ -81,8 +81,7 @@ class MotionBertPretrain(BaseModel):
             self.motion_bert_optimizer.zero_grad()
             self.motion_pretrain_optimizer.zero_grad()
 
-            output = self.forward(input_random, data_length)
-
+            output = self.forward(label[:, :, 606:], input_random, data_length)
             loss = mask_loss(output, input, data_length)
             loss_list.append(loss.item())
             loss.backward()
@@ -92,8 +91,8 @@ class MotionBertPretrain(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self, x, x_length):
-        output = self.motion_bert(x, x_length)
+    def forward(self, key, x, x_length):
+        output = self.motion_bert(key, x, x_length)
         output = self.motion_pretrain(output, x_length)
         return output
 
