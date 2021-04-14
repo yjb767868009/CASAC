@@ -1,16 +1,19 @@
 import os
 import random
 import shutil
+import torch
 
-import numpy
 from tqdm import tqdm
 
 
 def get_norm(file_path):
-    normalize_data = numpy.float32(numpy.loadtxt(file_path))
+    with open(file_path, "r") as f:
+        lines = [list(map(float, line[:-1].split(" ")))
+                 for line in tqdm(f, desc="Loading Norm")]
+    normalize_data = torch.tensor(lines)
     mean = normalize_data[0]
     std = normalize_data[1]
-    for i in range(std.size):
+    for i in range(std.size(0)):
         if std[i] == 0:
             std[i] = 1
     return mean, std
@@ -26,8 +29,8 @@ def data_preprocess(root_dir):
 
     def save_data(i, write_input, write_output):
         print("Preprocess Data " + str(i) + " ......")
-        numpy.savetxt(os.path.join(input_dir, str(i) + '.txt'), write_input, fmt="%.8f")
-        numpy.savetxt(os.path.join(output_dir, str(i) + '.txt'), write_output, fmt="%.8f")
+        torch.save(write_input, os.path.join(input_dir, str(i) + '.pth'))
+        torch.save(write_output, os.path.join(output_dir, str(i) + '.pth'))
 
     sequences_file = open(os.path.join(root_dir, "Sequences.txt"), 'r')
     input_file = open(os.path.join(root_dir, "Input.txt"), 'r')
@@ -37,8 +40,8 @@ def data_preprocess(root_dir):
     output_mean, output_std = get_norm(os.path.join(root_dir, "OutputNorm.txt"))
 
     index = 0
-    write_input_list = numpy.empty(shape=[0, 5307]).astype('float32')
-    write_output_list = numpy.empty(shape=[0, 618]).astype('float32')
+    write_input_list = torch.zeros((0, 5307))
+    write_output_list = torch.zeros((0, 618))
     length = 0
     save_index = 0
     while True:
@@ -56,20 +59,20 @@ def data_preprocess(root_dir):
         if index != sequences_index:
             save_data(save_index, write_input_list, write_output_list)
             save_index += 1
-            write_input_list = numpy.empty(shape=[0, 5307])
-            write_output_list = numpy.empty(shape=[0, 618])
+            write_input_list = torch.zeros((0, 5307))
+            write_output_list = torch.zeros((0, 618))
             index = sequences_index
             length = 0
         input_data_str = input_file.readline()
         input_data = [[float(x) for x in input_data_str.split(' ')]]
-        input_data = numpy.array(input_data).astype('float32')
+        input_data = torch.tensor(input_data)
         input_data = (input_data - input_mean) / input_std
         output_data_str = output_file.readline()
         output_data = [[float(x) for x in output_data_str.split(' ')]]
-        output_data = numpy.array(output_data).astype('float32')
+        output_data = torch.tensor(output_data)
         output_data = (output_data - output_mean) / output_std
-        write_input_list = numpy.append(write_input_list, input_data, axis=0)
-        write_output_list = numpy.append(write_output_list, output_data, axis=0)
+        write_input_list = torch.cat((write_input_list, input_data), 0)
+        write_output_list = torch.cat((write_output_list, output_data), 0)
         length += 1
     save_data(save_index, write_input_list, write_output_list)
     print("Preprocess Data Complete")
@@ -103,8 +106,8 @@ def divide_train_test(root_dir, scale):
     random_size = 0
     for i in tqdm(range(data_size), ncols=100):
         file = input_list[i]
-        test_file = str(random_size) + '.txt'
-        train_file = str(i - random_size) + '.txt'
+        test_file = str(random_size) + '.pth'
+        train_file = str(i - random_size) + '.pth'
         if file in random_list:
             shutil.copy(os.path.join(input_dir, file), os.path.join(test_input_dir, test_file))
             shutil.copy(os.path.join(output_dir, file), os.path.join(test_output_dir, test_file))
@@ -130,7 +133,7 @@ def read_output_file(root_dir):
 
 
 if __name__ == '__main__':
-    read_output_file("E:/NSM/data")
-    # data_preprocess("/home/yujubo/disk/data")
-    # divide_train_test("/home/yujubo/disk/data", 0.1)
-    # divide_train_test("E:/NSM/data", 0.1)
+    # data_preprocess("E:/NSM/data3")
+    # divide_train_test("E:/NSM/data3", 0.1)
+    data_preprocess("/home/yujubo/disk/data")
+    divide_train_test("/home/yujubo/disk/data", 0.1)

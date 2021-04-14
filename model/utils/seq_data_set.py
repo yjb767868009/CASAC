@@ -6,6 +6,8 @@ import numpy as np
 import os
 from tqdm import tqdm
 
+from model.utils.ReadDataProcess import readData
+
 
 class DataSet(tordata.Dataset):
 
@@ -28,14 +30,15 @@ class DataSet(tordata.Dataset):
         return self.__getitem__(index)
 
     def load_all_data(self):
-        for i in tqdm(range(self.data_size), ncols=100):
-            self.load_data(i)
+        self.input_data = readData(self.input_data_dir, worker_nums=5)
+        self.label_data = readData(self.label_data_dir, worker_nums=5)
+        self.random_all_data(self.input_data)
 
     def __len__(self):
         return self.data_size
 
     def __loader__(self, path):
-        return torch.FloatTensor(np.float32(np.loadtxt(path)))
+        return torch.load(os.path.join(path))
 
     def __getitem__(self, item):
         if not self.cache:
@@ -69,3 +72,7 @@ class DataSet(tordata.Dataset):
                 elif prob < 0.9:
                     data[i] = data[random.randrange(data.size(0))]
         return data
+
+    def random_all_data(self, data):
+        for i in range(self.data_size):
+            self.input_data_random[i] = self.random_word(data[i])
