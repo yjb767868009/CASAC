@@ -91,13 +91,17 @@ class Model(object):
         )
 
         if key_train:
+            logging.info("key bert pretrain")
             self.key_bert_pretrain.train_init()
             self.step_train(self.key_bert_pretrain, train_data_iter, test_data_iter)
+            logging.info("key bert train")
             self.key_bert_prediction.train_init()
             self.step_train(self.key_bert_prediction, train_data_iter, test_data_iter)
         if motion_train:
+            logging.info("motion bert pretrain")
             self.motion_bert_pretrain.train_init()
             self.step_train(self.motion_bert_pretrain, train_data_iter, test_data_iter)
+            logging.info("motion bert train")
             self.motion_bert_prediction.train_init()
             self.step_train(self.motion_bert_prediction, train_data_iter, test_data_iter)
 

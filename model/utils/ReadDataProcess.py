@@ -14,7 +14,6 @@ def not_none_num(input_data):
 
 
 def read_data(input_data, start_index: int, end_index: int, data_root):
-    # print("thread id " + str(start_index) + " start")
     for index in range(start_index, end_index):
         input_data_line = torch.load(os.path.join(data_root, "%s.pth" % index))
         input_data[index] = input_data_line
