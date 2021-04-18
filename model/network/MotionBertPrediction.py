@@ -101,12 +101,8 @@ class MotionBertPrediction(BaseModel):
 class MotionPrediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.start_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1296, 1024), nn.ELU(), )
-        self.mid_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1024, 1024), nn.ELU(), )
-        self.end_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1024, 606), )
+        self.layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1296, 606), nn.ELU(), )
 
     def forward(self, x, x_length):
-        x = self.start_layer(x)
-        x = self.mid_layer(x)
-        x = self.end_layer(x)
+        x = self.layer(x)
         return x

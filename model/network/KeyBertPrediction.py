@@ -99,12 +99,8 @@ class KeyBertPrediction(BaseModel):
 class KeyPrediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.start_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1280, 512), nn.ELU(), )
-        self.mid_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(512, 64), nn.ELU(), )
-        self.end_layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(64, 12), )
+        self.layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1280, 12), nn.ELU(), )
 
     def forward(self, x, x_length):
-        x = self.start_layer(x)
-        x = self.mid_layer(x)
-        x = self.end_layer(x)
+        x = self.layer(x)
         return x
