@@ -100,7 +100,7 @@ class KeyBertPretrain(BaseModel):
 class KeyPretrain(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Dropout(0.1), nn.Linear(1280, 5307), nn.ELU(), )
+        self.layer = nn.Linear(1280, 5307)
 
     def forward(self, x, x_length):
         x = self.layer(x)
