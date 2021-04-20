@@ -15,6 +15,7 @@ parser.add_argument("--batch_size", default=1, type=int, help="data_root")
 parser.add_argument("--data_root", default="", help="data_root")
 parser.add_argument("--save_path", default="", help="save model param path")
 parser.add_argument("--load_path", default="", help="load model param path")
+parser.add_argument("--pretrain", help="retrain model", action="store_true")
 parser.add_argument("--key_train", help="train key prediction model", action="store_true")
 parser.add_argument("--motion_train", help="train motion prediction model", action="store_true")
 parser.add_argument("--test", help="test model", action="store_true")
@@ -28,6 +29,6 @@ if __name__ == "__main__":
                            save_path=args.save_path, load_path=args.load_path, cache=args.cache,
                            train=train_flag)
     if train_flag:
-        model.train(args.key_train, args.motion_train)
+        model.train(args.pretrain, args.key_train, args.motion_train)
     if args.test:
         model.test(args.load_path if not train_flag else "")

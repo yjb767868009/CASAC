@@ -49,7 +49,7 @@ class KeyBertPrediction(BaseModel):
             torch.load(os.path.join(load_path, 'key_prediction_optimizer.pth')))
 
     def update_lr(self):
-        self.lr /= 10
+        self.lr /= 2
         for param_group in self.key_bert_optimizer.param_groups:
             param_group['lr'] = self.lr
         for param_group in self.key_prediction_optimizer.param_groups:

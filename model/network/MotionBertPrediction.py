@@ -50,7 +50,7 @@ class MotionBertPrediction(BaseModel):
             torch.load(os.path.join(load_path, 'motion_prediction_optimizer.pth')))
 
     def update_lr(self):
-        self.lr /= 10
+        self.lr /= 2
         for param_group in self.motion_bert_optimizer.param_groups:
             param_group['lr'] = self.lr
         for param_group in self.motion_prediction_optimizer.param_groups:

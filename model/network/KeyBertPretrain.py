@@ -48,7 +48,7 @@ class KeyBertPretrain(BaseModel):
         self.key_pretrain_optimizer.load_state_dict(torch.load(os.path.join(load_path, 'key_pretrain_optimizer.pth')))
 
     def update_lr(self):
-        self.lr /= 10
+        self.lr /= 2
         for param_group in self.key_bert_optimizer.param_groups:
             param_group['lr'] = self.lr
         for param_group in self.key_pretrain_optimizer.param_groups:
