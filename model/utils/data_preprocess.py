@@ -1,3 +1,4 @@
+import argparse
 import os
 import random
 import shutil
@@ -19,11 +20,11 @@ def get_norm(file_path):
     return mean, std
 
 
-def data_preprocess(root_dir):
-    input_dir = os.path.join(root_dir, "Input")
+def data_preprocess(root_dir, output_root, data_length):
+    input_dir = os.path.join(output_root, "Input")
     if not os.path.exists(input_dir):
         os.mkdir(input_dir)
-    output_dir = os.path.join(root_dir, "Label")
+    output_dir = os.path.join(output_root, "Label")
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
@@ -49,13 +50,13 @@ def data_preprocess(root_dir):
         if sequences_data == '':
             break
         sequences_index = int(sequences_data) - 1
-        if length >= 30:
+        if length >= int(data_length * 1.5):
             print("OVERSIZE SPILT")
-            save_data(save_index, write_input_list[:20], write_output_list[:20])
+            save_data(save_index, write_input_list[:data_length], write_output_list[:data_length])
             save_index += 1
-            write_input_list = write_input_list[20:]
-            write_output_list = write_output_list[20:]
-            length = length - 20
+            write_input_list = write_input_list[data_length:]
+            write_output_list = write_output_list[data_length:]
+            length = length - data_length
         if index != sequences_index:
             save_data(save_index, write_input_list, write_output_list)
             save_index += 1
@@ -132,8 +133,15 @@ def read_output_file(root_dir):
         print(output_data[611:618])
 
 
+parser = argparse.ArgumentParser(description="Train")
+parser.add_argument("--data_root", type=str, help="data file root dir")
+parser.add_argument("--output_root", type=str, help="output file root dir")
+parser.add_argument("--data_length", type=int, help="data time length")
+parser.add_argument("--scale", type=float, help="train and test scale")
+args = parser.parse_args()
+
 if __name__ == '__main__':
-    # data_preprocess("E:/NSM/data3")
+    # data_preprocess("")
     # divide_train_test("E:/NSM/data3", 0.1)
-    data_preprocess("/home/yujubo/disk/data")
-    divide_train_test("/home/yujubo/disk/data", 0.1)
+    data_preprocess(args.data_root, args.output_root, args.data_length)
+    divide_train_test(args.output_root, args.scale)
