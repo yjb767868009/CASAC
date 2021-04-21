@@ -1,7 +1,6 @@
 import argparse
 
 from model.bert.model import Model
-from model.utils.data_preprocess import data_preprocess
 
 # Check GPU available
 from model.utils.initialization import initialization

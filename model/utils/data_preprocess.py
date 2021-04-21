@@ -133,15 +133,12 @@ def read_output_file(root_dir):
         print(output_data[611:618])
 
 
-parser = argparse.ArgumentParser(description="Train")
-parser.add_argument("--data_root", type=str, help="data file root dir")
-parser.add_argument("--output_root", type=str, help="output file root dir")
-parser.add_argument("--data_length", type=int, help="data time length")
-parser.add_argument("--scale", type=float, help="train and test scale")
-args = parser.parse_args()
-
 if __name__ == '__main__':
-    # data_preprocess("")
-    # divide_train_test("E:/NSM/data3", 0.1)
+    parser = argparse.ArgumentParser(description="Train")
+    parser.add_argument("--data_root", type=str, help="data file root dir")
+    parser.add_argument("--output_root", type=str, help="output file root dir")
+    parser.add_argument("--data_length", type=int, help="data time length")
+    parser.add_argument("--scale", type=float, help="train and test scale")
+    args = parser.parse_args()
     data_preprocess(args.data_root, args.output_root, args.data_length)
     divide_train_test(args.output_root, args.scale)
