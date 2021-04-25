@@ -101,7 +101,7 @@ class MotionBertPrediction(BaseModel):
 class MotionPrediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Linear(1280, 1024),
+        self.layer = nn.Sequential(nn.Linear(1296, 1024),
                                    nn.ELU(),
                                    nn.Linear(1024, 1024),
                                    nn.ELU(),
