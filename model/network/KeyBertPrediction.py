@@ -23,7 +23,7 @@ class KeyBertPrediction(BaseModel):
         self.key_prediction_optimizer = torch.optim.AdamW(self.key_prediction.parameters(), lr=self.lr)
 
     def train_init(self):
-        self.key_bert.train()
+        self.key_bert.eval()
         self.key_prediction.train()
 
     def test_init(self):
@@ -32,10 +32,10 @@ class KeyBertPrediction(BaseModel):
 
     def save(self, save_path):
         # Save Model
-        torch.save(self.key_bert.state_dict(), os.path.join(save_path, "key_bert.pth"))
+        # torch.save(self.key_bert.state_dict(), os.path.join(save_path, "key_bert.pth"))
         torch.save(self.key_prediction.state_dict(), os.path.join(save_path, "key_prediction.pth"))
         # Save optimizer
-        torch.save(self.key_bert_optimizer.state_dict(), os.path.join(save_path, "key_bert_optimizer.pth"))
+        # torch.save(self.key_bert_optimizer.state_dict(), os.path.join(save_path, "key_bert_optimizer.pth"))
         torch.save(self.key_prediction_optimizer.state_dict(),
                    os.path.join(save_path, "key_prediction_optimizer.pth"))
 
