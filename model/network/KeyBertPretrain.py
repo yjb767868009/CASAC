@@ -74,15 +74,15 @@ class KeyBertPretrain(BaseModel):
         loss_list = []
         for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
-                input = input.cuda()
+                # input = input.cuda()
                 input_random = input_random.cuda()
-                # label = label.cuda()
+                label = label.cuda()
             self.key_bert_optimizer.zero_grad()
             self.key_pretrain_optimizer.zero_grad()
 
             output = self.forward(input_random, data_length)
 
-            loss = mask_loss(output, input, data_length)
+            loss = mask_loss(output, label, data_length)
             loss_list.append(loss.item())
             loss.backward()
 
@@ -100,11 +100,11 @@ class KeyBertPretrain(BaseModel):
 class KeyPretrain(torch.nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Linear(1280, 2048),
+        self.layer = nn.Sequential(nn.Linear(1280, 1024),
                                    nn.ELU(),
-                                   nn.Linear(2048, 4096),
+                                   nn.Linear(1024, 1024),
                                    nn.ELU(),
-                                   nn.Linear(4096, 5307),
+                                   nn.Linear(1024, 618),
                                    )
 
     def forward(self, x, x_length):
