@@ -58,13 +58,13 @@ class KeyBertPretrain(BaseModel):
         loss_list = []
         for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
-                input = input.cuda()
+                # input = input.cuda()
                 input_random = input_random.cuda()
-                # label = label.cuda()
+                label = label.cuda()
 
             output = self.forward(input_random, data_length)
 
-            loss = mask_loss(output, input, data_length)
+            loss = mask_loss(output, label, data_length)
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
