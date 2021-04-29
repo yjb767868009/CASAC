@@ -37,9 +37,10 @@ class Model(object):
         self.save_path = save_path
         self.load_path = load_path
 
-        self.embedding = Embedding(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation)
-        self.key_bert = KeyBERT(self.embedding, key_bert_hidden, n_layers, attn_heads, bert_dropout, )
-        self.motion_bert = MotionBERT(self.embedding, motion_bert_hidden, n_layers, attn_heads, bert_dropout, )
+        self.key_bert = KeyBERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
+                                key_bert_hidden, n_layers, attn_heads, bert_dropout, )
+        self.motion_bert = MotionBERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
+                                      motion_bert_hidden, n_layers, attn_heads, bert_dropout, )
 
         self.key_bert_pretrain = KeyBertPretrain(self.key_bert, lr)
         self.key_bert_prediction = KeyBertPrediction(self.key_bert, lr)
@@ -112,10 +113,10 @@ class Model(object):
         if load_path != "":
             self.load_param(load_path)
         data_iter = tordata.DataLoader(
-            dataset=self.test_source,
+            dataset=self.train_source,
             batch_size=self.batch_size,
             num_workers=0,
-            shuffle=True,
+            shuffle=False,
             collate_fn=collate_fn,
         )
         self.key_bert_prediction.test_init()

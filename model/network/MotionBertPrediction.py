@@ -87,7 +87,6 @@ class MotionBertPrediction(BaseModel):
             output = self.forward(label[:, :, 606:], input, data_length)
             loss = mask_last_loss(output, label[:, :, :606], data_length)
             loss_list.append(loss.item())
-            loss.backward()
 
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
