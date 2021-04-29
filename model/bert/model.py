@@ -57,7 +57,7 @@ class Model(object):
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
-            if (e + 1) % 30 == 0:
+            if (e + 1) % 20 == 0:
                 model.update_lr()
             loss = model.train(train_data_iter)
             test_loss = model.test(test_data_iter)
