@@ -103,13 +103,13 @@ def divide_train_test(root_dir, scale):
     input_list = os.listdir(input_dir)
     data_size = len(input_list)
     assert data_size == len(os.listdir(output_dir)), "输入和输出文件数量不一致"
-    random_list = random.sample(input_list, int(data_size * scale))
+    # random_list = random.sample(input_list, int(data_size * scale))
     random_size = 0
     for i in tqdm(range(data_size), ncols=100):
         file = input_list[i]
         test_file = str(random_size) + '.pth'
         train_file = str(i - random_size) + '.pth'
-        if file in random_list:
+        if (i + 1) % int(1 / scale) == 0:
             shutil.copy(os.path.join(input_dir, file), os.path.join(test_input_dir, test_file))
             shutil.copy(os.path.join(output_dir, file), os.path.join(test_output_dir, test_file))
             random_size += 1
