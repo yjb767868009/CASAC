@@ -13,7 +13,7 @@ conf = {
                             ['elu', 'elu'],
                             ['elu', 'elu'],
                             ['elu', 'elu']],
-    'encoder_dropout': 0.3,
+    'encoder_dropout': 0.1,
 
     'key_bert_hidden': 1280,
     'motion_bert_hidden': 1296,
