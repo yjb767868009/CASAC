@@ -12,7 +12,7 @@ from model.utils.initialization import initialization
 class Server(object):
     def __init__(self, model_path):
         self.model = initialization(100, 1, None, model_path, model_path, train=False, unity=True)
-        self.model.load_param()
+        self.model.load_param(model_path)
         self.data = torch.empty(0, 5307)
         self.full = False
         self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
@@ -21,22 +21,22 @@ class Server(object):
         # self.csv_writer.writerow([i for i in range(618)])
 
     def forward(self, x):
-        x = np.array(x)
+        x = torch.tensor(x)
         x = (x - self.input_mean) / self.input_std
-        x = torch.FloatTensor([x])
+        x = x.unsqueeze(0)
         self.data = torch.cat((self.data, x), 0)
         if self.full is True:
             self.data = self.data[1:]
-            data_length = 20
+            data_length = 10
         else:
             data_length = self.data.size(0)
-            if data_length >= 20:
+            if data_length >= 10:
                 self.full = True
         # t1=datetime.now()
         data = self.model.forward(self.data.unsqueeze(0), [data_length])
         # t2=datetime.now()
         # print(t2-t1)
-        data = data[0][-1].cpu().detach().numpy()
+        data = data[0][-1].cpu().detach()
         data = data * self.output_std + self.output_mean
         # self.csv_writer.writerow(data)
-        return data.tolist()
+        return data.numpy().tolist()

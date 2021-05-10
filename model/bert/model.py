@@ -53,7 +53,8 @@ class Model(object):
 
     def forward(self, x, x_length=None):
         key = self.key_bert_prediction.forward(x, x_length)
-        return self.motion_bert_prediction.forward(key, x, x_length)
+        motion = self.motion_bert_prediction.forward(key, x, x_length)
+        return torch.cat((motion, key),2)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
