@@ -136,5 +136,5 @@ if __name__ == '__main__':
     parser.add_argument("--data_length", type=int, help="data time length")
     parser.add_argument("--scale", type=float, help="train and test scale")
     args = parser.parse_args()
-    # data_preprocess(args.data_root, args.output_root, args.data_length)
+    data_preprocess(args.data_root, args.output_root, args.data_length)
     divide_train_test(args.output_root, args.scale)
