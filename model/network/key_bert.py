@@ -35,20 +35,14 @@ class KeyBERT(nn.Module):
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
 
-    def forward(self, x, x_lenth):
+    def forward(self, x):
         # attention masking for padded token
         # torch.ByteTensor([batch_size, 1, seq_len, seq_len)
-        mask = torch.zeros((x.size(0), x.size(1))).float()
-        for i in range(len(mask)):
-            mask[i][:x_lenth[i]] = 1
-        mask = (mask > 0).unsqueeze(1).repeat(1, mask.size(1), 1).unsqueeze(1)
-        if torch.cuda.is_available():
-            mask = mask.cuda()
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x)
 
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
-            x = transformer.forward(x, mask)
+            x = transformer.forward(x, None)
 
         return x

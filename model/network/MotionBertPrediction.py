@@ -58,7 +58,7 @@ class MotionBertPrediction(BaseModel):
 
     def train(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label)    in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 # input_random = input_random.cuda()
@@ -66,8 +66,8 @@ class MotionBertPrediction(BaseModel):
             self.motion_bert_optimizer.zero_grad()
             self.motion_prediction_optimizer.zero_grad()
 
-            output = self.forward(label[:, :, 606:], input, data_length)
-            loss = mask_last_loss(output, label[:, :, :606], data_length)
+            output = self.forward(label[:, :, 606:], input   )
+            loss = mask_last_loss(output, label[:, :, :606]   )
             loss_list.append(loss.item())
             loss.backward()
 
@@ -78,22 +78,22 @@ class MotionBertPrediction(BaseModel):
 
     def test(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label)    in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 # input_random = input_random.cuda()
                 label = label.cuda()
 
-            output = self.forward(label[:, :, 606:], input, data_length)
-            loss = mask_last_loss(output, label[:, :, :606], data_length)
+            output = self.forward(label[:, :, 606:], input   )
+            loss = mask_last_loss(output, label[:, :, :606]   )
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self, key, x, x_length):
-        output = self.motion_bert(key, x, x_length)
-        output = self.motion_prediction(output, x_length)
+    def forward(self, key, x  ):
+        output = self.motion_bert(key, x  )
+        output = self.motion_prediction(output  )
         return output
 
 
@@ -109,6 +109,6 @@ class MotionPrediction(nn.Module):
                                    nn.Linear(1024, 606),
                                    )
 
-    def forward(self, x, x_length):
+    def forward(self, x  ):
         x = self.layer(x)
         return x

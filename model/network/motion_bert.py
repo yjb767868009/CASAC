@@ -37,25 +37,19 @@ class MotionBERT(nn.Module):
 
         self.key_layer=nn.Linear(12,16)
 
-    def forward(self, key, x, x_lenth):
+    def forward(self, key, x):
         # attention masking for padded token
         # torch.ByteTensor([batch_size, 1, seq_len, seq_len)
-        mask = torch.zeros((x.size(0), x.size(1))).float()
-        for i in range(len(mask)):
-            mask[i][:x_lenth[i]] = 1
-        mask = (mask > 0).unsqueeze(1).repeat(1, mask.size(1), 1).unsqueeze(1)
-        if torch.cuda.is_available():
-            mask = mask.cuda()
 
-        assert (key.size(0) == x.size(0))and (key.size(1) == x.size(1)), 'key size not equal x size'
+        assert (key.size(0) == x.size(0)) and (key.size(1) == x.size(1)), 'key size not equal x size'
 
         # embedding the indexed sequence to sequence of vectors
         x = self.embedding(x)
-        key=self.key_layer(key)
+        key = self.key_layer(key)
         x = torch.cat([x, key], 2)
 
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
-            x = transformer.forward(x, mask)
+            x = transformer.forward(x, None)
 
         return x

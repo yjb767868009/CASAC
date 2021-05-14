@@ -57,15 +57,15 @@ class MotionBertPretrain(BaseModel):
 
     def test(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label)    in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 input_random = input_random.cuda()
                 # label = label.cuda()
 
-            output = self.forward(label[:, :, 606:], input_random, data_length)
+            output = self.forward(label[:, :, 606:], input_random   )
 
-            loss = mask_loss(output, input, data_length)
+            loss = mask_loss(output, input   )
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
@@ -73,7 +73,7 @@ class MotionBertPretrain(BaseModel):
 
     def train(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label)    in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 input_random = input_random.cuda()
@@ -81,8 +81,8 @@ class MotionBertPretrain(BaseModel):
             self.motion_bert_optimizer.zero_grad()
             self.motion_pretrain_optimizer.zero_grad()
 
-            output = self.forward(label[:, :, 606:], input_random, data_length)
-            loss = mask_loss(output, input, data_length)
+            output = self.forward(label[:, :, 606:], input_random   )
+            loss = mask_loss(output, input   )
             loss_list.append(loss.item())
             loss.backward()
 
@@ -91,9 +91,9 @@ class MotionBertPretrain(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self, key, x, x_length):
-        output = self.motion_bert(key, x, x_length)
-        output = self.motion_pretrain(output, x_length)
+    def forward(self, key, x  ):
+        output = self.motion_bert(key, x  )
+        output = self.motion_pretrain(output  )
         return output
 
 
@@ -102,6 +102,6 @@ class MotionPretrain(torch.nn.Module):
         super().__init__()
         self.layer = nn.Linear(1296, 5307)
 
-    def forward(self, x, x_length):
+    def forward(self, x  ):
         x = self.layer(x)
         return x

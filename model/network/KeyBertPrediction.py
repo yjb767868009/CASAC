@@ -6,6 +6,7 @@ from tqdm import tqdm
 from .BaseModel import BaseModel
 from model.utils import model2gpu
 from model.utils import mask_last_loss
+from .attention.gelu import GELU
 
 
 class KeyBertPrediction(BaseModel):
@@ -57,14 +58,14 @@ class KeyBertPrediction(BaseModel):
 
     def test(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label) in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 # input_random = input_random.cuda()
                 label = label.cuda()
 
-            output = self.forward(input, data_length)
-            loss = mask_last_loss(output, label[:, :, 606:618], data_length)
+            output = self.forward(input)
+            loss = mask_last_loss(output, label[:, :, 606:618])
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
@@ -72,7 +73,7 @@ class KeyBertPrediction(BaseModel):
 
     def train(self, data_iter):
         loss_list = []
-        for (input, input_random, label), data_length in tqdm(data_iter, ncols=100):
+        for (input, input_random, label) in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
                 input = input.cuda()
                 # input_random = input_random.cuda()
@@ -80,8 +81,8 @@ class KeyBertPrediction(BaseModel):
             self.key_bert_optimizer.zero_grad()
             self.key_prediction_optimizer.zero_grad()
 
-            output = self.forward(input, data_length)
-            loss = mask_last_loss(output, label[:, :, 606:618], data_length)
+            output = self.forward(input)
+            loss = mask_last_loss(output, label[:, :, 606:618])
             loss_list.append(loss.item())
             loss.backward()
 
@@ -90,9 +91,9 @@ class KeyBertPrediction(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self, x, x_length):
-        # output = self.key_bert(x, x_length)
-        output = self.key_prediction(output, x_length)
+    def forward(self, x):
+        output = self.key_bert(x)
+        output = self.key_prediction(output)
         return output
 
 
@@ -108,13 +109,12 @@ class KeyPrediction(nn.Module):
                                    nn.Linear(32, 12),
                                    )
 
-    def forward(self, x, x_length):
+    def forward(self, x):
         x = self.layer(x)
         return x
 
-
 class LinearBlock(nn.Module):
-    def __init__(self, dim, mlp_ratio=4., drop=0., drop_path=0., act=nn.GELU,
+    def __init__(self, dim, mlp_ratio=4., drop=0., drop_path=0., act=GELU,
                  norm=nn.LayerNorm, n_tokens=197):  # 197 = 16**2 + 1
         super().__init__()
         # self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
@@ -135,7 +135,7 @@ class LinearBlock(nn.Module):
 
 
 class Mlp(nn.Module):
-    def __init__(self, in_features, hidden_features, act_layer=nn.GELU, drop=0.):
+    def __init__(self, in_features, hidden_features, act_layer=GELU, drop=0.):
         super().__init__()
         self.fc1 = nn.Linear(in_features, hidden_features)
         self.act = act_layer()
@@ -149,4 +149,3 @@ class Mlp(nn.Module):
         x = self.fc2(x)
         x = self.drop(x)
         return x
-

@@ -50,15 +50,7 @@ def data_preprocess(root_dir, output_root, data_length):
         if sequences_data == '':
             break
         sequences_index = int(sequences_data) - 1
-        if length >= int(data_length * 1.5):
-            print("OVERSIZE SPILT")
-            save_data(save_index, write_input_list[:data_length], write_output_list[:data_length])
-            save_index += 1
-            write_input_list = write_input_list[data_length:]
-            write_output_list = write_output_list[data_length:]
-            length = length - data_length
         if index != sequences_index:
-            save_data(save_index, write_input_list, write_output_list)
             save_index += 1
             write_input_list = torch.zeros((0, 5307))
             write_output_list = torch.zeros((0, 618))
@@ -75,7 +67,12 @@ def data_preprocess(root_dir, output_root, data_length):
         write_input_list = torch.cat((write_input_list, input_data), 0)
         write_output_list = torch.cat((write_output_list, output_data), 0)
         length += 1
-    save_data(save_index, write_input_list, write_output_list)
+        if length >= data_length:
+            save_data(save_index, write_input_list, write_output_list)
+            save_index += 1
+            write_input_list = torch.zeros((0, 5307))
+            write_output_list = torch.zeros((0, 618))
+            length = 0
     print("Preprocess Data Complete")
 
 
@@ -103,7 +100,6 @@ def divide_train_test(root_dir, scale):
     input_list = os.listdir(input_dir)
     data_size = len(input_list)
     assert data_size == len(os.listdir(output_dir)), "输入和输出文件数量不一致"
-    # random_list = random.sample(input_list, int(data_size * scale))
     random_size = 0
     for i in tqdm(range(data_size), ncols=100):
         file = input_list[i]
@@ -140,5 +136,5 @@ if __name__ == '__main__':
     parser.add_argument("--data_length", type=int, help="data time length")
     parser.add_argument("--scale", type=float, help="train and test scale")
     args = parser.parse_args()
-    data_preprocess(args.data_root, args.output_root, args.data_length)
+    # data_preprocess(args.data_root, args.output_root, args.data_length)
     divide_train_test(args.output_root, args.scale)

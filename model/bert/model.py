@@ -14,7 +14,6 @@ from model.network import *
 from model.utils.GPU_tools import *
 from model.utils.Loss import *
 from model.network import KeyBERT,MotionBERT
-from model.utils.collate_fn import collate_fn
 
 
 class Model(object):
@@ -51,9 +50,9 @@ class Model(object):
         self.key_bert_prediction.load_param(load_path)
         self.motion_bert_prediction.load_param(load_path)
 
-    def forward(self, x, x_length=None):
-        key = self.key_bert_prediction.forward(x, x_length)
-        motion = self.motion_bert_prediction.forward(key, x, x_length)
+    def forward(self, x  =None):
+        key = self.key_bert_prediction.forward(x  )
+        motion = self.motion_bert_prediction.forward(key, x  )
         return torch.cat((motion, key),2)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
@@ -82,14 +81,12 @@ class Model(object):
             batch_size=self.batch_size,
             num_workers=0,
             shuffle=True,
-            collate_fn=collate_fn,
         )
         test_data_iter = tordata.DataLoader(
             dataset=self.test_source,
             batch_size=self.batch_size,
             num_workers=0,
             shuffle=True,
-            collate_fn=collate_fn,
         )
 
         if key_train:
@@ -118,7 +115,6 @@ class Model(object):
             batch_size=self.batch_size,
             num_workers=0,
             shuffle=False,
-            collate_fn=collate_fn,
         )
         self.key_bert_prediction.test_init()
         key_loss = self.key_bert_prediction.test(data_iter)
