@@ -107,6 +107,8 @@ class KeyPrediction(nn.Module):
         x = self.layer(x)
         return x
 
+
+"""
 class LinearBlock(nn.Module):
     def __init__(self, dim, mlp_ratio=4., drop=0., drop_path=0., act=GELU,
                  norm=nn.LayerNorm, n_tokens=197):  # 197 = 16**2 + 1
@@ -143,3 +145,4 @@ class Mlp(nn.Module):
         x = self.fc2(x)
         x = self.drop(x)
         return x
+"""

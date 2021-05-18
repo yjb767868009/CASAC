@@ -8,3 +8,4 @@ from .KeyBertPretrain import KeyBertPretrain
 from .KeyBertPrediction import KeyBertPrediction
 from .MotionBertPretrain import MotionBertPretrain
 from .MotionBertPrediction import MotionBertPrediction
+from .BertPrediction import BertPrediction

@@ -45,6 +45,7 @@ class Model(object):
         self.key_bert_prediction = KeyBertPrediction(self.key_bert, lr)
         self.motion_bert_pretrain = MotionBertPretrain(self.motion_bert, lr)
         self.motion_bert_prediction = MotionBertPrediction(self.motion_bert, lr)
+        self.bert_prediction = BertPrediction(self.key_bert, lr)
 
     def load_param(self, load_path):
         self.key_bert_prediction.load_param(load_path)
@@ -71,7 +72,7 @@ class Model(object):
                 print("saving")
                 model.save(self.save_path)
 
-    def train(self, pretrain=True, key_train=True, motion_train=True):
+    def train(self, pretrain=True, base_train=True, key_train=True, motion_train=True):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
@@ -89,6 +90,9 @@ class Model(object):
             shuffle=True,
         )
 
+        if base_train:
+            logging.info("bert train")
+            self.step_train(self.bert_prediction, train_data_iter, test_data_iter)
         if key_train:
             if pretrain:
                 logging.info("key bert pretrain")
