@@ -48,13 +48,15 @@ class Model(object):
         self.bert_prediction = BertPrediction(self.key_bert, lr)
 
     def load_param(self, load_path):
-        self.key_bert_prediction.load_param(load_path)
-        self.motion_bert_prediction.load_param(load_path)
+        self.bert_prediction.load_param(load_path)
+        # self.key_bert_prediction.load_param(load_path)
+        # self.motion_bert_prediction.load_param(load_path)
 
-    def forward(self, x  =None):
-        key = self.key_bert_prediction.forward(x  )
-        motion = self.motion_bert_prediction.forward(key, x  )
-        return torch.cat((motion, key),2)
+    def forward(self, x=None):
+        # key = self.key_bert_prediction.forward(x  )
+        # motion = self.motion_bert_prediction.forward(key, x  )
+        # return torch.cat((motion, key),2)
+        return self.bert_prediction.forward(x)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):

@@ -45,7 +45,7 @@ class BertPrediction(BaseModel):
         self.bert.load_state_dict(torch.load(os.path.join(load_path, 'bert.pth')))
         self.prediction.load_state_dict(torch.load(os.path.join(load_path, 'prediction.pth')))
         # Load optimizer
-        self.bert_optimizer.load_state_dict(torch.load(os.path.join(load_path, 'bert_optimizer.pth')))
+        #self.bert_optimizer.load_state_dict(torch.load(os.path.join(load_path, 'bert_optimizer.pth')))
         self.prediction_optimizer.load_state_dict(
             torch.load(os.path.join(load_path, 'prediction_optimizer.pth')))
 
