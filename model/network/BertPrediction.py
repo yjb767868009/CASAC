@@ -106,11 +106,10 @@ class BertPrediction(BaseModel):
                 label = label.cuda()
 
             output = self.bert(input)
-            output = self.prediction(output)
-            loss1 = last_loss(output, label)
+            prediction_output = self.prediction(output)
+            loss1 = last_loss(prediction_output, label)
 
-            rebuild_output = self.bert(input)
-            rebuild_output = self.rebuild(rebuild_output)
+            rebuild_output = self.rebuild(output)
             loss2 = base_loss(rebuild_output, input)
 
             loss = loss1 + loss2
