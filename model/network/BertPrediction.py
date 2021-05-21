@@ -126,13 +126,7 @@ class BertPrediction(BaseModel):
 class Prediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Linear(1792, 1024),
-                                   nn.ELU(),
-                                   nn.Linear(1024, 1024),
-                                   nn.ELU(),
-                                   nn.Linear(1024, 1024),
-                                   nn.ELU(),
-                                   nn.Linear(1024, 618),
+        self.layer = nn.Sequential(nn.Linear(1792,618),
                                    )
 
     def forward(self, x):
@@ -143,11 +137,7 @@ class Prediction(nn.Module):
 class Rebuild(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Linear(1792, 2048),
-                                   nn.ELU(),
-                                   nn.Linear(2048, 4096),
-                                   nn.ELU(),
-                                   nn.Linear(4096, 5307),
+        self.layer = nn.Sequential(nn.Linear(1792,5307),
                                    )
 
     def forward(self, x):
