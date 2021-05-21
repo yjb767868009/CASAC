@@ -106,11 +106,9 @@ class BertPrediction(BaseModel):
                 label = label.cuda()
 
             output = self.bert(input)
-            prediction_output = self.prediction(output)
-            loss1 = last_loss(prediction_output, label)
+            loss1 = last_loss(self.prediction(output), label)
 
-            rebuild_output = self.rebuild(output)
-            loss2 = base_loss(rebuild_output, input)
+            loss2 = base_loss(self.rebuild(output), input)
 
             loss = loss1 + loss2
 
@@ -119,7 +117,7 @@ class BertPrediction(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         return avg_loss
 
-    def forward(self,x):
+    def forward(self, x):
         output = self.bert(x)
         output = self.prediction(output)
         return output
