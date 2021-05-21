@@ -100,7 +100,7 @@ class KeyBertPrediction(BaseModel):
 class KeyPrediction(nn.Module):
     def __init__(self):
         super().__init__()
-        self.layer = nn.Sequential(nn.Linear(1792, 12),
+        self.layer = nn.Sequential(nn.Linear(1152, 12),
                                    )
 
     def forward(self, x):
