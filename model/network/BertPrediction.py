@@ -105,10 +105,9 @@ class BertPrediction(BaseModel):
                 # input_random = input_random.cuda()
                 label = label.cuda()
 
-            output = self.bert(input)
-            loss1 = last_loss(self.prediction(output), label)
-
-            loss2 = base_loss(self.rebuild(output), input)
+            prediction_output, rebuild_output = self.forward(input)
+            loss1 = last_loss(prediction_output, label)
+            loss2 = base_loss(rebuild_output, input)
 
             loss = loss1 + loss2
 
@@ -119,8 +118,9 @@ class BertPrediction(BaseModel):
 
     def forward(self, x):
         output = self.bert(x)
-        output = self.prediction(output)
-        return output
+        prediction_output = self.prediction(output)
+        rebuild_output = self.rebuild(output)
+        return prediction_output, rebuild_output
 
 
 class Prediction(nn.Module):
