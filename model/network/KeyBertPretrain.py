@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from .BaseModel import BaseModel
 from model.utils import model2gpu
-from model.utils import mask_loss
+from model.utils import base_loss
 
 
 class KeyBertPretrain(BaseModel):
@@ -64,7 +64,7 @@ class KeyBertPretrain(BaseModel):
 
             output = self.forward(input_random   )
 
-            loss = mask_loss(output, label   )
+            loss = base_loss(output, label)
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
@@ -82,7 +82,7 @@ class KeyBertPretrain(BaseModel):
 
             output = self.forward(input_random   )
 
-            loss = mask_loss(output, label   )
+            loss = base_loss(output, label)
             loss_list.append(loss.item())
             loss.backward()
 

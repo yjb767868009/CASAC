@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 from model.utils import model2gpu
-from model.utils import mask_loss
+from model.utils import base_loss
 
 
 class BaseModel(object):

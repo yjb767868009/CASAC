@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from .BaseModel import BaseModel
 from model.utils import model2gpu
-from model.utils import mask_last_loss
+from model.utils import last_loss
 
 
 class MotionBertPrediction(BaseModel):
@@ -67,7 +67,7 @@ class MotionBertPrediction(BaseModel):
             self.motion_prediction_optimizer.zero_grad()
 
             output = self.forward(label[:, :, 606:], input   )
-            loss = mask_last_loss(output, label[:, :, :606]   )
+            loss = last_loss(output, label[:, :, :606])
             loss_list.append(loss.item())
             loss.backward()
 
@@ -85,7 +85,7 @@ class MotionBertPrediction(BaseModel):
                 label = label.cuda()
 
             output = self.forward(label[:, :, 606:], input   )
-            loss = mask_last_loss(output, label[:, :, :606]   )
+            loss = last_loss(output, label[:, :, :606])
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()

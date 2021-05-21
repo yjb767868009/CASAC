@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from .BaseModel import BaseModel
 from model.utils import model2gpu
-from model.utils import mask_loss
+from model.utils import base_loss
 
 
 class MotionBertPretrain(BaseModel):
@@ -65,7 +65,7 @@ class MotionBertPretrain(BaseModel):
 
             output = self.forward(label[:, :, 606:], input_random   )
 
-            loss = mask_loss(output, input   )
+            loss = base_loss(output, input)
             loss_list.append(loss.item())
 
         avg_loss = np.asarray(loss_list).mean()
@@ -82,7 +82,7 @@ class MotionBertPretrain(BaseModel):
             self.motion_pretrain_optimizer.zero_grad()
 
             output = self.forward(label[:, :, 606:], input_random   )
-            loss = mask_loss(output, input   )
+            loss = base_loss(output, input)
             loss_list.append(loss.item())
             loss.backward()
 
