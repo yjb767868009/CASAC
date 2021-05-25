@@ -67,6 +67,8 @@ class BertPrediction(BaseModel):
             param_group['lr'] = self.lr
 
     def train(self, data_iter):
+        prediction_loss = []
+        rebuild_loss = []
         loss_list = []
         for (input, input_random, label) in tqdm(data_iter, ncols=100):
             if torch.cuda.is_available():
@@ -87,6 +89,8 @@ class BertPrediction(BaseModel):
 
             loss = loss1 + loss2
 
+            prediction_loss.append(loss1.item())
+            rebuild_loss.append(loss2.item())
             loss_list.append(loss.item())
             loss.backward()
 
@@ -95,6 +99,9 @@ class BertPrediction(BaseModel):
             self.rebuild_optimizer.step()
 
         avg_loss = np.asarray(loss_list).mean()
+        prediction_loss = np.asarray(prediction_loss).mean()
+        rebuild_loss = np.asarray(rebuild_loss).mean()
+        print("prediction_loss:" + str(prediction_loss) + "\n rebuild loss:" + str(rebuild_loss))
         return avg_loss
 
     def test(self, data_iter):
