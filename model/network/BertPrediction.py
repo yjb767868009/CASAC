@@ -101,7 +101,7 @@ class BertPrediction(BaseModel):
         avg_loss = np.asarray(loss_list).mean()
         prediction_loss = np.asarray(prediction_loss).mean()
         rebuild_loss = np.asarray(rebuild_loss).mean()
-        print("prediction_loss:" + str(prediction_loss) + "\n rebuild loss:" + str(rebuild_loss))
+        print("prediction_loss:" + str(prediction_loss) + " rebuild loss:" + str(rebuild_loss))
         return avg_loss
 
     def test(self, data_iter):
