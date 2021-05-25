@@ -23,3 +23,8 @@ def last_loss(x, y):
     """
     loss = torch.mean(torch.pow((x[:, -1, :] - y[:, -1, :]), 2))
     return loss
+
+
+def mean_loss(x, y):
+    loss = torch.mean(torch.pow((x.mean(dim=1) - y[:, -1, :]), 2))
+    return loss
