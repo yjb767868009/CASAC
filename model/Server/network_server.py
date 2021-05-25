@@ -24,22 +24,18 @@ class Server(object):
         x = torch.tensor(x)
         x = (x - self.input_mean) / self.input_std
         x = x.unsqueeze(0)
-        if self.data.size(0) == 0:
-            self.data = x.repeat(10, 1)
-        else:
-            self.data = torch.cat((self.data, x), 0)
+
+        self.data = torch.cat((self.data, x), 0)
+        if self.full is True:
             self.data = self.data[1:]
-        # self.data = torch.cat((self.data, x), 0)
-        # if self.full is True:
-        #     self.data = self.data[1:]
-        #     data_length = 10
-        # else:
-        #     data_length = self.data.size(0)
-        #     if data_length >= 10:
-        #         self.full = True
+            data_length = 10
+        else:
+            data_length = self.data.size(0)
+            if data_length >= 10:
+                self.full = True
         # t1=datetime.now()
         # data = self.model.forward(self.data.unsqueeze(0), [data_length])
-        data = self.model.forward(self.data.unsqueeze(0))
+        data,_ = self.model.forward(self.data.unsqueeze(0))
         # t2=datetime.now()
         # print(t2-t1)
         data = data[0][-1].cpu().detach()
