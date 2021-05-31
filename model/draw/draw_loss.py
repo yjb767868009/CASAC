@@ -40,6 +40,8 @@ def draw_train_loss(file_path):
             continue
         train_loss.append(float(x[9]))
         test_loss.append(float(x[13]))
+    train_loss = train_loss[1:]
+    test_loss = test_loss[1:]
     x = [i for i in range(len(train_loss))]
     plt.plot(x, train_loss, label="train loss")
     plt.plot(x, test_loss, label="test loss")
@@ -51,5 +53,4 @@ def draw_train_loss(file_path):
     plt.show()
 
 if __name__ == '__main__':
-    draw_pretrain_loss("D:/NSM/log1.txt")
-    draw_train_loss("D:/NSM/log2.txt")
+    draw_train_loss("E:/NSM/trained20210525/log.txt")
