@@ -14,29 +14,27 @@ class Server(object):
         model_path = 'E:/NSM/trained20210525/'
         self.model = initialization(100, 1, None, model_path, model_path, train=False, unity=True)
         self.model.load_param(model_path)
+        self.model.bert_prediction.test_init()
         self.data = torch.empty(0, 5307)
         self.full = False
         self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
         self.output_mean, self.output_std = get_norm("E:/NSM/data/OutputNorm.txt")
-        self.input_writer = csv.writer(open('Input.csv', 'w', newline=""))
-        self.input_writer.writerow([i for i in range(5307)])
-        self.output_writer = csv.writer(open('Output.csv', 'w', newline=""))
-        self.output_writer.writerow([i for i in range(618)])
+        # self.input_writer = csv.writer(open('Input.csv', 'w', newline=""))
+        # self.input_writer.writerow([i for i in range(5307)])
+        # self.output_writer = csv.writer(open('Output.csv', 'w', newline=""))
+        # self.output_writer.writerow([i for i in range(618)])
 
     def forward(self, x):
         x = torch.tensor(x)
-        self.input_writer.writerow(x.numpy().tolist())
+        # self.input_writer.writerow(x.numpy().tolist())
         x = (x - self.input_mean) / self.input_std
         x = x.unsqueeze(0)
 
-        self.data = torch.cat((self.data, x), 0)
-        if self.full is True:
-            self.data = self.data[1:]
-            data_length = 10
+        if self.data.size(0) == 0:
+            self.data = x.repeat(10, 1)
         else:
-            data_length = self.data.size(0)
-            if data_length >= 10:
-                self.full = True
+            self.data = torch.cat((self.data, x), 0)
+            self.data = self.data[1:]
         # t1=datetime.now()
         # data = self.model.forward(self.data.unsqueeze(0), [data_length])
         data, _ = self.model.forward(self.data.unsqueeze(0))
@@ -45,5 +43,5 @@ class Server(object):
         data = data[0][-1].cpu().detach()
         data = data * self.output_std + self.output_mean
         data = data.numpy().tolist()
-        self.output_writer.writerow(data)
+        #self.output_writer.writerow(data)
         return data
