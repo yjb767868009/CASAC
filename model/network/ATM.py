@@ -15,11 +15,10 @@ class ATM(BaseModel):
     Animation Transformer Model
     """
 
-    def __init__(self):
+    def __init__(self, lr):
         super().__init__()
-        self.at = AT()
-        self.lr = self.at.lr
-        self.at = model2gpu(self.at)
+        self.lr = lr
+        self.at = model2gpu(AT())
         self.at_optimizer = torch.optim.AdamW(self.at.parameters(), lr=self.lr)
 
     def train_init(self):

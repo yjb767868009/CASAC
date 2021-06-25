@@ -16,7 +16,6 @@ class AT(nn.Module):
         self.embedding = Embedding(conf["embedding"])
         self.bert = BERT(conf["hidden_dim"], dropout=conf["bert_dropout"])
         self.prediction = Prediction(conf["hidden_dim"])
-        self.lr = conf['lr']
 
     def forward(self, x):
         y = self.embedding(x)

@@ -30,7 +30,7 @@ class Model(object):
         self.test_source = test_source
         self.save_path = save_path
 
-        self.atm = ATM()
+        self.atm = ATM(lr)
 
     def load_param(self, load_path):
         self.atm.load_param(load_path)

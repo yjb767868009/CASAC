@@ -1,5 +1,4 @@
 conf = {
-    'lr': 0.001,
     "embedding": {
         'segmentation': [0, 419, 575, 2609, 4657, 5307],
         'encoder_nums': 5,
