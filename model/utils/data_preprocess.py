@@ -106,27 +106,12 @@ def divide_train_test(root_dir, scale):
         test_file = str(random_size) + '.pth'
         train_file = str(i - random_size) + '.pth'
         if (i + 1) % int(1 / scale) == 0:
-            shutil.copy(os.path.join(input_dir, file), os.path.join(test_input_dir, test_file))
-            shutil.copy(os.path.join(output_dir, file), os.path.join(test_output_dir, test_file))
+            shutil.move(os.path.join(input_dir, file), os.path.join(test_input_dir, test_file))
+            shutil.move(os.path.join(output_dir, file), os.path.join(test_output_dir, test_file))
             random_size += 1
         else:
-            shutil.copy(os.path.join(input_dir, file), os.path.join(train_input_dir, train_file))
-            shutil.copy(os.path.join(output_dir, file), os.path.join(train_output_dir, train_file))
-
-
-def read_input_file(root_dir):
-    input_file = open(os.path.join(root_dir, "Input.txt"), 'r')
-    while True:
-        input_data_str = input_file.readline()
-        input_data = [float(x) for x in input_data_str.split(' ')]
-
-
-def read_output_file(root_dir):
-    output_file = open(os.path.join(root_dir, "Output.txt"), 'r')
-    while True:
-        output_data_str = output_file.readline()
-        output_data = [float(x) for x in output_data_str.split(' ')]
-        print(output_data[611:618])
+            shutil.move(os.path.join(input_dir, file), os.path.join(train_input_dir, train_file))
+            shutil.move(os.path.join(output_dir, file), os.path.join(train_output_dir, train_file))
 
 
 if __name__ == '__main__':

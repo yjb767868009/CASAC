@@ -28,8 +28,5 @@ class BaseModel(object):
     def update_lr(self):
         pass
 
-    def train(self, data_iter):
-        pass
-
-    def test(self, data_iter):
+    def ep(self, data_iter, train):
         pass

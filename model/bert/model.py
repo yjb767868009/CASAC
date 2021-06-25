@@ -11,59 +11,39 @@ import torch.utils.cpp_extension
 import torch.utils.data as tordata
 import torch.nn.utils.rnn as rnn_utils
 from model.network import *
+from model.network.ATM import ATM
 from model.utils.GPU_tools import *
 from model.utils.Loss import *
-from model.network import KeyBERT,MotionBERT
 
 
 class Model(object):
     def __init__(self,
                  # For Date information
-                 train_source, test_source, save_path, load_path,
-                 # For encoder network information
-                 encoder_nums, encoder_dims, encoder_activations, encoder_dropout,
-                 # For BERT network information
-                 key_bert_hidden,motion_bert_hidden, n_layers, attn_heads, bert_dropout,
+                 train_source, test_source, save_path,
                  # For Model base information
-                 epoch, batch_size, segmentation, lr,
+                 epoch, batch_size,
                  ):
         self.epoch = epoch
         self.batch_size = batch_size
-        self.segmentation = segmentation
 
         self.train_source = train_source
         self.test_source = test_source
         self.save_path = save_path
-        self.load_path = load_path
 
-        self.key_bert = KeyBERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
-                                key_bert_hidden, n_layers, attn_heads, bert_dropout, )
-        self.motion_bert = MotionBERT(encoder_nums, encoder_dims, encoder_activations, encoder_dropout, segmentation,
-                                      motion_bert_hidden, n_layers, attn_heads, bert_dropout, )
-
-        self.key_bert_pretrain = KeyBertPretrain(self.key_bert, lr)
-        self.key_bert_prediction = KeyBertPrediction(self.key_bert, lr)
-        self.motion_bert_pretrain = MotionBertPretrain(self.motion_bert, lr)
-        self.motion_bert_prediction = MotionBertPrediction(self.motion_bert, lr)
-        self.bert_prediction = BertPrediction(self.key_bert, lr)
+        self.atm = ATM()
 
     def load_param(self, load_path):
-        self.bert_prediction.load_param(load_path)
-        # self.key_bert_prediction.load_param(load_path)
-        # self.motion_bert_prediction.load_param(load_path)
+        self.atm.load_param(load_path)
 
     def forward(self, x=None):
-        # key = self.key_bert_prediction.forward(x  )
-        # motion = self.motion_bert_prediction.forward(key, x  )
-        # return torch.cat((motion, key),2)
-        return self.bert_prediction.forward(x)
+        return self.atm.forward(x)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
             if (e + 1) % 30 == 0:
                 model.update_lr()
-            loss = model.train(train_data_iter)
-            test_loss = model.test(test_data_iter)
+            loss = model.ep(train_data_iter, train=True)
+            test_loss = model.ep(test_data_iter, train=False)
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
@@ -74,7 +54,7 @@ class Model(object):
                 print("saving")
                 model.save(self.save_path)
 
-    def train(self, pretrain=True, base_train=True, key_train=True, motion_train=True):
+    def train(self):
         logging.basicConfig(level=logging.INFO,
                             format='%(asctime)s  %(message)s',
                             filename=os.path.join(self.save_path, 'log.txt'))
@@ -92,25 +72,7 @@ class Model(object):
             shuffle=True,
         )
 
-        if base_train:
-            logging.info("bert train")
-            self.step_train(self.bert_prediction, train_data_iter, test_data_iter)
-        if key_train:
-            if pretrain:
-                logging.info("key bert pretrain")
-                self.key_bert_pretrain.train_init()
-                self.step_train(self.key_bert_pretrain, train_data_iter, test_data_iter)
-            logging.info("key bert train")
-            self.key_bert_prediction.train_init()
-            self.step_train(self.key_bert_prediction, train_data_iter, test_data_iter)
-        if motion_train:
-            if pretrain:
-                logging.info("motion bert pretrain")
-                self.motion_bert_pretrain.train_init()
-                self.step_train(self.motion_bert_pretrain, train_data_iter, test_data_iter)
-            logging.info("motion bert train")
-            self.motion_bert_prediction.train_init()
-            self.step_train(self.motion_bert_prediction, train_data_iter, test_data_iter)
+        self.step_train(self.atm, train_data_iter, test_data_iter)
 
     def test(self, load_path=""):
         print("Testing")
@@ -122,10 +84,7 @@ class Model(object):
             num_workers=0,
             shuffle=False,
         )
-        self.key_bert_prediction.test_init()
-        key_loss = self.key_bert_prediction.test(data_iter)
-        self.motion_bert_prediction.test_init()
-        motion_loss = self.motion_bert_prediction.test(data_iter)
-        message = 'Key Loss = {:.5f} '.format(key_loss) + \
-                  'Motion Loss = {:.5f} '.format(motion_loss)
+        self.atm.test_init()
+        loss = self.atm.test(data_iter)
+        message = 'Loss = {:.5f} '.format(loss)
         print(message)
