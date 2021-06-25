@@ -21,7 +21,7 @@ class Model(object):
                  # For Date information
                  train_source, test_source, save_path,
                  # For Model base information
-                 epoch, batch_size,
+                 epoch, batch_size, lr,
                  ):
         self.epoch = epoch
         self.batch_size = batch_size
@@ -85,6 +85,6 @@ class Model(object):
             shuffle=False,
         )
         self.atm.test_init()
-        loss = self.atm.test(data_iter)
+        loss = self.atm.ep(data_iter, train=False)
         message = 'Loss = {:.5f} '.format(loss)
         print(message)

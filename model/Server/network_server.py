@@ -5,16 +5,16 @@ import numpy as np
 import torch
 import csv
 
+from model.bert.model import Model
 from model.utils.data_preprocess import get_norm
-from model.utils.initialization import initialization
 
 
 class Server(object):
     def __init__(self):
         model_path = 'E:/NSM/trained20210525/'
-        self.model = initialization(100, 1, None, model_path, model_path, train=False, unity=True)
+        self.model = Model(None, None, None, None, None, )
         self.model.load_param(model_path)
-        self.model.bert_prediction.test_init()
+        self.model.atm.test_init()
         self.data = torch.empty(0, 5307)
         self.full = False
         self.input_mean, self.input_std = get_norm("E:/NSM/data/InputNorm.txt")
