@@ -52,7 +52,7 @@ class BERT(nn.Module):
     def forward(self, x):
         # running over multiple transformer blocks
         for transformer in self.transformer_blocks:
-            x = transformer.forward(x, None)
+            x = transformer.forward(x)
         return x
 
 

@@ -1,22 +1,19 @@
 import logging
 import os
-import numpy as np
-import datetime
 from tqdm import tqdm
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.utils
-import torch.utils.cpp_extension
 import torch.utils.data as tordata
-import torch.nn.utils.rnn as rnn_utils
 from model.network import *
 from model.network.ATM import ATM
-from model.utils.GPU_tools import *
-from model.utils.Loss import *
 
 
 class Model(object):
+    """
+    模型训练框架
+    """
+
     def __init__(self,
                  # For Date information
                  train_source, test_source, save_path,
@@ -33,6 +30,7 @@ class Model(object):
         self.atm = ATM(lr)
 
     def load_param(self, load_path):
+        self.atm.test_init()
         self.atm.load_param(load_path)
 
     def forward(self, x=None):

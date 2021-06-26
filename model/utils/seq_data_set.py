@@ -6,7 +6,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 
-from model.utils.ReadDataProcess import readData
+from model.utils.ReadDataProcess import read_data
 
 
 class DataSet(tordata.Dataset):
@@ -30,24 +30,24 @@ class DataSet(tordata.Dataset):
         return self.__getitem__(index)
 
     def load_all_data(self):
-        self.input_data = readData(self.input_data_dir, worker_nums=5)
-        self.label_data = readData(self.label_data_dir, worker_nums=5)
+        self.input_data = read_data(self.input_data_dir, worker_nums=5)
+        self.label_data = read_data(self.label_data_dir, worker_nums=5)
         # self.random_all_data(self.input_data)
 
     def __len__(self):
         return self.data_size
 
     def __loader__(self, path):
-        return torch.load(os.path.join(path))
+        return torch.load(path)
 
     def __getitem__(self, item):
         if not self.cache:
-            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.txt'))
-            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.txt'))
+            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.pth'))
+            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.pth'))
             # input_data_random = self.random_word(input_data)
         elif self.input_data[item] is None or self.label_data[item] is None:
-            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.txt'))
-            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.txt'))
+            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.pth'))
+            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.pth'))
             # input_data_random = self.random_word(input_data)
             self.input_data[item] = input_data
             # self.input_data_random[item] = input_data_random
