@@ -32,7 +32,7 @@ class Server(object):
 
         t = data2gpu(self.data.unsqueeze(0))
         data = self.model.forward(t)
-        data = data[0][-1].cpu().detach()
+        data = data.mean(dim=1)[0].cpu().detach()
         data = data * self.output_std + self.output_mean
         data = data.numpy().tolist()
         return data

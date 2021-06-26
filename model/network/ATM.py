@@ -7,7 +7,7 @@ from tqdm import tqdm
 from .AT import AT
 from .BaseModel import BaseModel
 from model.utils import model2gpu
-from model.utils import last_loss
+from model.utils import mean_loss
 
 
 class ATM(BaseModel):
@@ -54,7 +54,7 @@ class ATM(BaseModel):
                 self.at_optimizer.zero_grad()
 
             output = self.forward(input)
-            loss = last_loss(output, label)
+            loss = mean_loss(output, label)
             loss_list.append(loss.item())
             loss.backward()
             if train:
