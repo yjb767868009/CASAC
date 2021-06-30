@@ -12,7 +12,7 @@ conf = {
                                 ['elu', 'elu'],
                                 ['elu', 'elu'],
                                 ['elu', 'elu']],
-        'encoder_dropout': 0.1,
+        'encoder_dropout': 0.3,
     },
     'hidden_dim': 256 + 128 + 256 + 256 + 256,
     'bert_dropout': 0.1,

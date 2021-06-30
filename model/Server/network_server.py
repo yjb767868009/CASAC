@@ -8,10 +8,12 @@ from model.bert.model import Model
 from model.utils import data2gpu
 from model.utils.data_preprocess import get_norm
 
-write_file = True
+write_file = False
+
+
 class Server(object):
     def __init__(self):
-        model_path = 'E:/NSM/trained20210626/'
+        model_path = 'E:/NSM/trained20210630/'
         self.model = Model(None, None, None, 1, 100, 0.0001)
         self.model.load_param(model_path)
         self.data = torch.empty(0, 5307)
