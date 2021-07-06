@@ -5,11 +5,15 @@ from model.network import Encoder
 
 
 class Embedding(nn.Module):
-    def __init__(self, n_layers, dims, activations, dropout, segmentation):
+    def __init__(self, parameter):
         super().__init__()
-        self.n_layer = n_layers
-        self.segmentation = segmentation
-        self.encoder_blocks = nn.ModuleList([Encoder(dims[i], activations[i], dropout) for i in range(n_layers)])
+        self.n_layer = parameter["encoder_nums"]
+        self.segmentation = parameter["segmentation"]
+        self.encoder_blocks = nn.ModuleList(
+            [Encoder(parameter["encoder_dims"][i],
+                     parameter["encoder_activations"][i],
+                     parameter["encoder_dropout"])
+             for i in range(self.n_layer)])
 
     def forward(self, x):
         y = []

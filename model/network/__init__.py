@@ -1,4 +1,4 @@
 from .Encoder import Encoder
-from .Discriminative import Discriminative
-from .RNN import RNN
+from .Embedding import Embedding
 from .attention import TransformerBlock
+from .BaseModel import BaseModel
