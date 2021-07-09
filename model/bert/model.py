@@ -37,9 +37,10 @@ class Model(object):
         return self.atm.forward(x)
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
+        print(model)
         for e in range(self.epoch):
-            # if (e + 1) % 30 == 0:
-            #     model.update_lr()
+            if (e + 1) % 50 == 0:
+                model.update_lr()
             loss = model.ep(train_data_iter, train=True)
             test_loss = model.ep(test_data_iter, train=False)
             train_message = 'Epoch {} : '.format(e + 1) + \

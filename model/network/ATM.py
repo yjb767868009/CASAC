@@ -65,3 +65,6 @@ class ATM(BaseModel):
     def forward(self, x):
         output = self.at(x)
         return output
+
+    def __str__(self):
+        return str(self.at)
