@@ -15,7 +15,7 @@ class ATM(BaseModel):
     Animation Transformer Model
     """
 
-    def __init__(self, lr):
+    def __init__(self, lr=0.0001):
         super().__init__()
         self.lr = lr
         self.at = model2gpu(AT())

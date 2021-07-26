@@ -13,10 +13,10 @@ class Encoder(torch.nn.Module):
         self.encoder_dropout = encoder_dropout
         self.layer_nums = len(encoder_dims) - 1
 
-        self.layer1 = nn.Sequential(nn.Dropout(encoder_dropout,  ),
+        self.layer1 = nn.Sequential(nn.Dropout(encoder_dropout, ),
                                     nn.Linear(encoder_dims[0], encoder_dims[1]),
                                     activation_layer(encoder_activations[0]))
-        self.layer2 = nn.Sequential(nn.Dropout(encoder_dropout,  ),
+        self.layer2 = nn.Sequential(nn.Dropout(encoder_dropout, ),
                                     nn.Linear(encoder_dims[1], encoder_dims[2]),
                                     activation_layer(encoder_activations[1]))
 

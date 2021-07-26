@@ -1,9 +1,9 @@
+import os
+
 import argparse
 
 from model.bert.model import Model
-
-# Check GPU available
-from model.utils.initialization import initialization
+from model.utils.data_set import load_data
 
 parser = argparse.ArgumentParser(description="Train")
 parser.add_argument("--cache", help="cache: if set as TRUE all the training data will be loaded at once"
@@ -19,8 +19,11 @@ parser.add_argument("--test", help="test model", action="store_true")
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    model = initialization(args)
+    model = Model(args.save_path, args.epoch, args.batch_size, args.lr)
     if args.train:
-        model.train()
+        train_source = load_data(os.path.join(args.data_root, "Train"), cache=args.cache)
+        test_source = load_data(os.path.join(args.data_root, "Test"), cache=args.cache)
+        model.train(train_source, test_source)
     if args.test:
-        model.test(args.load_path if not args.train else "")
+        test_source = load_data(os.path.join(args.data_root, "Test"), cache=args.cache)
+        model.test(test_source, args.load_path if not args.train else "")
