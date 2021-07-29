@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.utils
 import torch.utils.data as tordata
+
 from model.network import *
 from model.network.ATM import ATM
 
@@ -25,7 +26,7 @@ class Model(object):
 
         self.save_path = save_path
 
-        self.atm = ATM(lr)
+        self.atm = ATM(self.save_path, lr)
 
     def load_param(self, load_path):
         self.atm.test_init()
@@ -38,8 +39,9 @@ class Model(object):
         for e in range(self.epoch):
             if (e + 1) % 30 == 0:
                 model.update_lr()
-            loss = model.ep(train_data_iter, train=True)
-            test_loss = model.ep(test_data_iter, train=False)
+            loss = model.ep(train_data_iter, e, train=True)
+            test_loss = model.ep(test_data_iter, e, train=False)
+
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \

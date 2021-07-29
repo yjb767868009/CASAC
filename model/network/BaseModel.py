@@ -10,8 +10,9 @@ class BaseModel(object):
     """
     Base model
     """
+
     def __init__(self):
-        self.lr=0
+        self.lr = 0
 
     def train_init(self):
         pass
@@ -28,5 +29,5 @@ class BaseModel(object):
     def update_lr(self):
         pass
 
-    def ep(self, data_iter, train):
+    def ep(self, data_iter, epoch, train):
         pass
