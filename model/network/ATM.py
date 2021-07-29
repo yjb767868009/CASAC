@@ -102,15 +102,15 @@ class ATM(BaseModel):
         loss = np.asarray(loss_list).mean()
 
         title = "Train" if train else "Test"
-        self.writer.add_scalar(title + '/all_loss', all_loss, epoch)
-        self.writer.add_scalar(title + '/pose_loss', pose_loss, epoch)
-        self.writer.add_scalar(title + '/inverse_pose_loss', inverse_pose_loss, epoch)
-        self.writer.add_scalar(title + '/trajectory_pose_loss', trajectory_pose_loss, epoch)
-        self.writer.add_scalar(title + '/inverse_trajectory_pose_loss', inverse_trajectory_pose_loss, epoch)
-        self.writer.add_scalar(title + '/goal_loss', goal_loss, epoch)
-        self.writer.add_scalar(title + '/contact_loss', contact_loss, epoch)
-        self.writer.add_scalar(title + '/phase_loss', phase_loss, epoch)
-        self.writer.add_scalar(title + '/loss', loss, epoch)
+        self.writer.add_scalars('Loss/all_loss', {title: all_loss}, epoch)
+        self.writer.add_scalars('Loss/pose_loss', {title: pose_loss}, epoch)
+        self.writer.add_scalars('Loss/inverse_pose_loss', {title: inverse_pose_loss}, epoch)
+        self.writer.add_scalars('Loss/trajectory_pose_loss', {title: trajectory_pose_loss}, epoch)
+        self.writer.add_scalars('Loss/inverse_trajectory_pose_loss', {title: inverse_trajectory_pose_loss}, epoch)
+        self.writer.add_scalars('Loss/goal_loss', {title: goal_loss}, epoch)
+        self.writer.add_scalars('Loss/contact_loss', {title: contact_loss}, epoch)
+        self.writer.add_scalars('Loss/phase_loss', {title: phase_loss}, epoch)
+        self.writer.add_scalars('Loss/loss', {title: loss}, epoch)
         return all_loss
 
     def forward(self, x):

@@ -33,6 +33,13 @@ def data_preprocess(root_dir, output_root, data_length):
         torch.save(write_input, os.path.join(input_dir, str(i) + '.pth'))
         torch.save(write_output, os.path.join(output_dir, str(i) + '.pth'))
 
+    def read_data(file, mean, std):
+        data_str = file.readline()
+        data = [[float(x) for x in data_str.split(' ')]]
+        data = torch.tensor(data)
+        data = (data - mean) / std
+        return data
+
     sequences_file = open(os.path.join(root_dir, "Sequences.txt"), 'r')
     input_file = open(os.path.join(root_dir, "Input.txt"), 'r')
     output_file = open(os.path.join(root_dir, "Output.txt"), 'r')
@@ -56,14 +63,8 @@ def data_preprocess(root_dir, output_root, data_length):
             write_output_list = torch.zeros((0, 618))
             index = sequences_index
             length = 0
-        input_data_str = input_file.readline()
-        input_data = [[float(x) for x in input_data_str.split(' ')]]
-        input_data = torch.tensor(input_data)
-        input_data = (input_data - input_mean) / input_std
-        output_data_str = output_file.readline()
-        output_data = [[float(x) for x in output_data_str.split(' ')]]
-        output_data = torch.tensor(output_data)
-        output_data = (output_data - output_mean) / output_std
+        input_data = read_data(input_file, input_mean, input_std)
+        output_data = read_data(output_file, output_mean, output_std)
         write_input_list = torch.cat((write_input_list, input_data), 0)
         write_output_list = torch.cat((write_output_list, output_data), 0)
         length += 1
