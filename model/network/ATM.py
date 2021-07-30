@@ -113,6 +113,13 @@ class ATM(BaseModel):
         self.writer.add_scalars('Loss/loss', {title: loss}, epoch)
         return all_loss
 
+    def view_attention(self, data_iter):
+        for input, label in tqdm(data_iter, ncols=100):
+            if torch.cuda.is_available():
+                input = input.cuda()
+                label = label.cuda()
+            output = self.forward(input)
+
     def forward(self, x):
         output = self.at(x)
         return output
