@@ -39,8 +39,8 @@ class Model(object):
         for e in range(self.epoch):
             if (e + 1) % 50 == 0:
                 model.update_lr()
-            loss = model.ep(train_data_iter, train=True)
-            test_loss = model.ep(test_data_iter, train=False)
+            loss = model.ep(train_data_iter, e, train=True)
+            test_loss = model.ep(test_data_iter, e, train=False)
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
