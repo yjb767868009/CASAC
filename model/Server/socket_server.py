@@ -15,8 +15,8 @@ import struct
 class Server():
     def __init__(self):
         self.write_file = False
-        self.model_path = 'E:/NSM/trained20210630/'
-        self.model = Model(None, None, None, 1, 100, 0.0001)
+        self.model_path = 'E:/NSM/trained20210730/'
+        self.model = Model(None, 1, 100, 0.0001)
         self.model.load_param(self.model_path)
         self.data = torch.empty(0, 5307)
         self.full = False
