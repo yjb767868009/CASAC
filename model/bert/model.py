@@ -82,6 +82,6 @@ class Model(object):
             shuffle=False,
         )
         self.atm.test_init()
-        loss = self.atm.ep(data_iter, train=False)
+        loss = self.atm.ep(data_iter, 1, train=False)
         message = 'Loss = {:.5f} '.format(loss)
         print(message)
