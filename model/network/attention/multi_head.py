@@ -1,5 +1,8 @@
 import torch.nn as nn
 from model.network.attention.single import Attention
+from torch.utils.tensorboard import SummaryWriter
+
+import torchvision
 
 
 class MultiHeadedAttention(nn.Module):
@@ -7,10 +10,10 @@ class MultiHeadedAttention(nn.Module):
     Take in model size and number of heads.
     """
 
-    def __init__(self, h, d_model, dropout=0.1):
+    def __init__(self, id, h, d_model, dropout=0.1):
         super().__init__()
         assert d_model % h == 0
-
+        self.id = id
         # We assume d_v always equals d_k
         self.d_k = d_model // h
         self.h = h
@@ -21,6 +24,8 @@ class MultiHeadedAttention(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
 
+        self.writer = SummaryWriter('D:/NSM/trained/log')
+
     def forward(self, query, key, value):
         batch_size = query.size(0)
 
@@ -30,6 +35,10 @@ class MultiHeadedAttention(nn.Module):
 
         # 2) Apply attention on all the projected vectors in batch.
         x, attn = self.attention(query, key, value, dropout=self.dropout)
+
+        # attn = attn.transpose(0, 1)
+        # img_grid = torchvision.utils.make_grid(attn, normalize=True, scale_each=True, nrow=4)
+        # self.writer.add_image('Attention/attention_%s' % self.id, img_grid, global_step=0)
 
         # 3) "Concat" using a view and apply a final linear.
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)

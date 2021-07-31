@@ -115,10 +115,10 @@ class ATM(BaseModel):
 
     def view_attention(self, data_iter):
         for input, label in tqdm(data_iter, ncols=100):
+            input = input[0].unsqueeze(0)
             if torch.cuda.is_available():
                 input = input.cuda()
-                label = label.cuda()
-            output = self.forward(input)
+            self.at(input)
 
     def forward(self, x):
         output = self.at(x)

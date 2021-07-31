@@ -86,3 +86,15 @@ class Model(object):
         loss = self.atm.ep(data_iter, 1, train=False)
         message = 'Loss = {:.5f} '.format(loss)
         print(message)
+
+    def view_ateention(self, test_source, load_path=""):
+        print("Testing")
+        self.load_param(load_path)
+        data_iter = tordata.DataLoader(
+            dataset=test_source,
+            batch_size=self.batch_size,
+            num_workers=0,
+            shuffle=False,
+        )
+        self.atm.test_init()
+        self.atm.view_attention(data_iter)

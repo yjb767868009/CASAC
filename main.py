@@ -16,6 +16,7 @@ parser.add_argument("--save_path", default="", help="save model param path")
 parser.add_argument("--load_path", default="", help="load model param path")
 parser.add_argument("--train", help="train model", action="store_true")
 parser.add_argument("--test", help="test model", action="store_true")
+parser.add_argument("--view_attention", help="view attention", action="store_true")
 args = parser.parse_args()
 
 if __name__ == "__main__":
@@ -27,3 +28,6 @@ if __name__ == "__main__":
     if args.test:
         test_source = load_data(os.path.join(args.data_root, "Test"), cache=args.cache)
         model.test(test_source, args.load_path if not args.train else "")
+    if args.view_attention:
+        train_source = load_data(os.path.join(args.data_root, "Train"), cache=args.cache)
+        model.view_ateention(train_source, args.load_path)

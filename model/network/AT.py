@@ -47,7 +47,7 @@ class BERT(nn.Module):
 
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
-            [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
+            [TransformerBlock(i, hidden, attn_heads, hidden * 4, dropout) for i in range(n_layers)])
 
     def forward(self, x):
         # running over multiple transformer blocks

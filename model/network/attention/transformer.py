@@ -11,8 +11,9 @@ class TransformerBlock(nn.Module):
     Transformer = MultiHead_Attention + Feed_Forward with sublayer connection
     """
 
-    def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
+    def __init__(self, id, hidden, attn_heads, feed_forward_hidden, dropout):
         """
+        :param id: the id of layer
         :param hidden: hidden size of transformer
         :param attn_heads: head sizes of multi-head attention
         :param feed_forward_hidden: feed_forward_hidden, usually 4*hidden_size
@@ -20,7 +21,7 @@ class TransformerBlock(nn.Module):
         """
 
         super().__init__()
-        self.attention = MultiHeadedAttention(h=attn_heads, d_model=hidden)
+        self.attention = MultiHeadedAttention(id=id, h=attn_heads, d_model=hidden)
         self.feed_forward = PositionwiseFeedForward(d_model=hidden, d_ff=feed_forward_hidden, dropout=dropout)
         self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
         self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
