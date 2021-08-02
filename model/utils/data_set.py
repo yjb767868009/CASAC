@@ -9,7 +9,7 @@ from tqdm import tqdm
 from model.utils.ReadDataProcess import read_data
 
 
-def load_data(data_root, cache=True):
+def load_data(data_root, batch_size, cache=True):
     input_dir = os.path.join(data_root, 'Input')
     label_dir = os.path.join(data_root, 'Label')
     data_source = DataSet(input_dir, label_dir, cache)
@@ -17,7 +17,13 @@ def load_data(data_root, cache=True):
         print("Loading cache")
         data_source.load_all_data()
         print("Loading finish")
-    return data_source
+    data_iter = tordata.DataLoader(
+        dataset=data_source,
+        batch_size=batch_size,
+        num_workers=0,
+        shuffle=False,
+    )
+    return data_iter
 
 
 class DataSet(tordata.Dataset):
