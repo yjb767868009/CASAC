@@ -17,8 +17,8 @@ def normalize(x, norm):
 
 
 def save_data(file_path, norm_path, train_save_path, test_save_path, train_list, test_list):
-    data = torch.tensor(np.loadtxt(file_path))
-    n = torch.tensor(np.loadtxt(norm_path))
+    data = torch.tensor(np.loadtxt(file_path)).float()
+    n = torch.tensor(np.loadtxt(norm_path)).float()
     data = normalize(data, n)
     train_data = data[train_list]
     test_data = data[test_list]
@@ -52,7 +52,7 @@ def data_preprocess(data_root, output_root, scale):
         if sequences_data == '':
             break
         sequences_index = int(sequences_data) - 1
-        test_or_train = (sequences_index + 1) % int(1 / scale) == 0
+        test_or_train = (data_index + 1) % int(1 / scale) == 0
         if data_index != sequences_index:
             data_index += 1
             if test_or_train:
