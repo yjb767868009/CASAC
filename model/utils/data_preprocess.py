@@ -35,7 +35,7 @@ def data_len2breakpoint(data_len_list):
     return breakpoint_list
 
 
-def process_data_message(data_root, output_root, scale):
+def data_preprocess(data_root, output_root, scale):
     train_data_len_list = []
     test_data_len_list = []
     sequences_file = open(os.path.join(data_root, "Sequences.txt"), 'r')
@@ -103,4 +103,4 @@ if __name__ == '__main__':
     parser.add_argument("--data_length", type=int, help="data time length")
     parser.add_argument("--scale", type=float, help="train and test scale")
     args = parser.parse_args()
-    process_data_message(args.data_root, args.output_root, args.scale)
+    data_preprocess(args.data_root, args.output_root, args.scale)

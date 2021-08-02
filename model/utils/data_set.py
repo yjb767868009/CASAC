@@ -4,16 +4,23 @@ import torch
 import torch.utils.data as tordata
 import os
 
+debug = False
 
-def load_data(data_root, batch_size, data_size, data_len=10):
-    data_source = DataSet(data_root, data_size, data_len)
-    data_iter = tordata.DataLoader(
-        dataset=data_source,
-        batch_size=batch_size,
-        num_workers=0,
-        shuffle=False,
-    )
-    return data_iter
+
+class DataManager(object):
+    def __init__(self, data_root, batch_size, data_size=10000, data_len=10):
+        self.batch_size = batch_size
+        self.data_source = DataSet(data_root, data_size, data_len)
+
+    def load_data(self):
+        self.data_source.get_new_data()
+        data_iter = tordata.DataLoader(
+            dataset=self.data_source,
+            batch_size=self.batch_size,
+            num_workers=0,
+            shuffle=False,
+        )
+        return data_iter
 
 
 class DataSet(tordata.Dataset):
@@ -25,7 +32,8 @@ class DataSet(tordata.Dataset):
         self.input_root = torch.load(os.path.join(data_root, "input.pth"))
         self.label_root = torch.load(os.path.join(data_root, "output.pth"))
         self.breakpoints = torch.load(os.path.join(data_root, "breakpoints.pth"))
-        # print(self.breakpoints)
+        if debug:
+            print(self.breakpoints)
         self.max_size = self.breakpoints[-1]
         self.input_data = []
         self.label_data = []
@@ -35,7 +43,8 @@ class DataSet(tordata.Dataset):
 
     def get_new_data(self):
         start_list = [random.randint(0, self.max_size) for _ in range(self.data_size)]
-        # print(start_list)
+        if debug:
+            print(start_list)
         start_list.sort()
         index = 0
         self.input_data = []
@@ -50,7 +59,8 @@ class DataSet(tordata.Dataset):
                     index += 1
             self.input_data.append(self.input_root[start_list[i]:start_list[i] + self.data_len])
             self.label_data.append(self.label_root[start_list[i]:start_list[i] + self.data_len])
-        # print(start_list)
+        if debug:
+            print(start_list)
 
     def __getitem__(self, item):
         input_data = self.input_data[item]

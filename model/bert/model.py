@@ -27,19 +27,21 @@ class Model(object):
     def forward(self, x=None):
         return self.atm.forward(x)
 
-    def step_train(self, model: BaseModel, train_data_iter, test_data_iter, epoch):
+    def step_train(self, model: BaseModel, train_data_manager, test_data_manager, epoch):
         for e in range(epoch):
             if (e + 1) % 30 == 0:
                 model.update_lr()
+            train_data_iter = train_data_manager.load_data()
+            test_data_iter = test_data_manager.load_data()
             model.ep(train_data_iter, e, train=True)
             model.ep(test_data_iter, e, train=False)
             if (e + 1) % 10 == 0:
                 print("saving")
                 model.save()
 
-    def train(self, train_data_iter, test_data_iter, epoch):
+    def train(self, train_data_manager, test_data_manager, epoch):
         self.atm.train_init()
-        self.step_train(self.atm, train_data_iter, test_data_iter, epoch)
+        self.step_train(self.atm, train_data_manager, test_data_manager, epoch)
 
     def test(self, data_iter, load_path=""):
         print("Testing")

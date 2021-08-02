@@ -4,7 +4,7 @@ import torch.utils.data as tordata
 import argparse
 
 from model.bert.model import Model
-from model.utils.data_set import load_data
+from model.utils.data_set import DataManager
 
 parser = argparse.ArgumentParser(description="Train")
 parser.add_argument("--cache", help="cache: if set as TRUE all the training data will be loaded at once"
@@ -23,12 +23,12 @@ args = parser.parse_args()
 if __name__ == "__main__":
     model = Model(args.save_path, args.lr)
     if args.train:
-        train_data_iter = load_data(os.path.join(args.data_root, "Train"), args.batch_size, cache=args.cache)
-        test_data_iter = load_data(os.path.join(args.data_root, "Test"), args.batch_size, cache=args.cache)
-        model.train(train_data_iter, test_data_iter, args.epoch, )
+        train_data_manager = DataManager(os.path.join(args.data_root, "Train"), args.batch_size, )
+        test_data_manager = DataManager(os.path.join(args.data_root, "Test"), args.batch_size, )
+        model.train(train_data_manager, test_data_manager, args.epoch, )
     if args.test:
-        data_iter = load_data(os.path.join(args.data_root, "Test"), args.batch_size, cache=args.cache)
-        model.test(data_iter, args.load_path if not args.train else "")
+        data_manager = DataManager(os.path.join(args.data_root, "Train"), args.batch_size, )
+        model.test(data_manager, args.load_path if not args.train else "")
     if args.view_attention:
-        data_iter = load_data(os.path.join(args.data_root, "Train"), args.batch_size, cache=args.cache)
-        model.view_attention(data_iter, args.load_path)
+        data_manager = DataManager(os.path.join(args.data_root, "Train"), args.batch_size, )
+        model.view_attention(data_manager, args.load_path)
