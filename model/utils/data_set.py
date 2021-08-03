@@ -39,7 +39,7 @@ class DataSet(tordata.Dataset):
         self.input_data = []
         self.label_data = []
         if data_size == 0:
-            self.data_size = self.max_size // 20
+            self.data_size = self.max_size // (2 * self.data_len)
 
     def __len__(self):
         return self.data_size
