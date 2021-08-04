@@ -62,8 +62,9 @@ class DataSet(tordata.Dataset):
                     index += 1
             ir = self.input_root[start_list[i]:start_list[i] + self.data_len]
             lr = self.label_root[start_list[i]:start_list[i] + self.data_len]
-            if ir.size(0) != 10 or lr.size(0) != 10:
-                print(ir.size(0), lr.size(0), start_list[i])
+            if debug:
+                if ir.size(0) != 10 or lr.size(0) != 10:
+                    print(ir.size(0), lr.size(0), start_list[i])
             self.input_data.append(ir)
             self.label_data.append(lr)
         if debug:
