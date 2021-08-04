@@ -39,7 +39,9 @@ class Model(object):
                 print("saving")
                 model.save()
 
-    def train(self, train_data_manager, test_data_manager, epoch):
+    def train(self, train_data_manager, test_data_manager, epoch, load_path):
+        if load_path != "":
+            self.load_param(load_path)
         self.atm.train_init()
         self.step_train(self.atm, train_data_manager, test_data_manager, epoch)
 

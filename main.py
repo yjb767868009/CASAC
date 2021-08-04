@@ -26,7 +26,7 @@ if __name__ == "__main__":
     if args.train:
         train_data_manager = DataManager(os.path.join(args.data_root, "Train"), args.batch_size, data_len=args.data_len)
         test_data_manager = DataManager(os.path.join(args.data_root, "Test"), args.batch_size, data_len=args.data_len)
-        model.train(train_data_manager, test_data_manager, args.epoch, )
+        model.train(train_data_manager, test_data_manager, args.epoch, args.load_path)
     if args.test:
         data_manager = DataManager(os.path.join(args.data_root, "Train"), args.batch_size, data_len=args.data_len)
         model.test(data_manager, args.load_path if not args.train else "")
