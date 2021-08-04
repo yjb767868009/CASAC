@@ -7,19 +7,24 @@ import numpy as np
 from tqdm import tqdm
 
 
-def normalize(x, norm):
+def get_norm(file_path):
+    norm = torch.tensor(np.loadtxt(file_path)).float()
     mean = norm[0]
     std = norm[1]
     for i in range(std.size(0)):
         if std[i] == 0:
             std[i] = 1
+    return mean, std
+
+
+def normalize(x, norm_path):
+    mean, std = get_norm(norm_path)
     return (x - mean) / std
 
 
 def save_data(file_path, norm_path, train_save_path, test_save_path, train_list, test_list):
     data = torch.tensor(np.loadtxt(file_path)).float()
-    n = torch.tensor(np.loadtxt(norm_path)).float()
-    data = normalize(data, n)
+    data = normalize(data, norm_path)
     train_data = data[train_list]
     test_data = data[test_list]
     torch.save(train_data, train_save_path)
