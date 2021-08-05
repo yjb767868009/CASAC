@@ -11,10 +11,11 @@ class AT(nn.Module):
     Animation Transformer
     """
 
-    def __init__(self):
+    def __init__(self, save_path):
         super().__init__()
+        self.save_path = save_path
         self.embedding = Embedding(conf["embedding"])
-        self.bert = BERT(conf["hidden_dim"], dropout=conf["bert_dropout"])
+        self.bert = BERT(save_path, conf["hidden_dim"], dropout=conf["bert_dropout"])
         self.prediction = Prediction(conf["hidden_dim"])
 
     def forward(self, x):
@@ -29,7 +30,7 @@ class BERT(nn.Module):
     BERT model : Bidirectional Encoder Representations from Transformers.
     """
 
-    def __init__(self, hidden=1280, n_layers=8, attn_heads=32, dropout=0.1):
+    def __init__(self, save_path, hidden=1280, n_layers=8, attn_heads=32, dropout=0.1):
         """
         :param hidden: BERT model hidden size
         :param n_layers: numbers of Transformer blocks(layers)
@@ -38,6 +39,7 @@ class BERT(nn.Module):
         """
 
         super().__init__()
+        self.save_path = save_path
         self.hidden = hidden
         self.n_layers = n_layers
         self.attn_heads = attn_heads
@@ -47,7 +49,7 @@ class BERT(nn.Module):
 
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
-            [TransformerBlock(i, hidden, attn_heads, hidden * 4, dropout) for i in range(n_layers)])
+            [TransformerBlock(i, save_path, hidden, attn_heads, hidden * 4, dropout) for i in range(n_layers)])
 
     def forward(self, x):
         # running over multiple transformer blocks

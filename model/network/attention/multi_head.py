@@ -10,7 +10,7 @@ class MultiHeadedAttention(nn.Module):
     Take in model size and number of heads.
     """
 
-    def __init__(self, id, h, d_model, dropout=0.1):
+    def __init__(self, id, save_path, h, d_model, dropout=0.1):
         super().__init__()
         assert d_model % h == 0
         self.id = id
@@ -24,7 +24,7 @@ class MultiHeadedAttention(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
 
-        self.writer = SummaryWriter('D:/NSM/trained/log')
+        self.writer = SummaryWriter(save_path + '/log')
 
     def forward(self, query, key, value):
         batch_size = query.size(0)

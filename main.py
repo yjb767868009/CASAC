@@ -1,4 +1,5 @@
 import os
+import torch.utils.data as tordata
 
 import argparse
 
@@ -20,14 +21,14 @@ parser.add_argument("--view_attention", help="view attention", action="store_tru
 args = parser.parse_args()
 
 if __name__ == "__main__":
-    model = Model(args.save_path, args.epoch, args.batch_size, args.lr)
+    model = Model(args.save_path, args.lr)
     if args.train:
-        train_source = load_data(os.path.join(args.data_root, "Train"), cache=args.cache)
-        test_source = load_data(os.path.join(args.data_root, "Test"), cache=args.cache)
-        model.train(train_source, test_source)
+        train_data_iter = load_data(os.path.join(args.data_root, "Train"), args.batch_size, cache=args.cache)
+        test_data_iter = load_data(os.path.join(args.data_root, "Test"), args.batch_size, cache=args.cache)
+        model.train(train_data_iter, test_data_iter, args.epoch, )
     if args.test:
-        test_source = load_data(os.path.join(args.data_root, "Test"), cache=args.cache)
-        model.test(test_source, args.load_path if not args.train else "")
+        data_iter = load_data(os.path.join(args.data_root, "Test"), args.batch_size, cache=args.cache)
+        model.test(data_iter, args.load_path if not args.train else "")
     if args.view_attention:
-        train_source = load_data(os.path.join(args.data_root, "Train"), cache=args.cache)
-        model.view_ateention(train_source, args.load_path)
+        data_iter = load_data(os.path.join(args.data_root, "Train"), args.batch_size, cache=args.cache)
+        model.view_attention(data_iter, args.load_path)

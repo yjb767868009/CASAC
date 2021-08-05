@@ -12,7 +12,7 @@ class BaseModel(object):
     """
 
     def __init__(self):
-        self.lr = 0
+        self.lr = 0.001
 
     def train_init(self):
         pass
@@ -20,7 +20,7 @@ class BaseModel(object):
     def test_init(self):
         pass
 
-    def save(self, save_path):
+    def save(self):
         pass
 
     def load_param(self, load_path):

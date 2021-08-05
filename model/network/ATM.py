@@ -20,7 +20,7 @@ class ATM(BaseModel):
         super().__init__()
         self.save_path = save_path
         self.lr = lr
-        self.at = model2gpu(AT())
+        self.at = model2gpu(AT(save_path))
         self.at_optimizer = torch.optim.AdamW(self.at.parameters(), lr=self.lr)
 
         self.writer = SummaryWriter(os.path.join(self.save_path, 'log'))
@@ -31,7 +31,7 @@ class ATM(BaseModel):
     def test_init(self):
         self.at.eval()
 
-    def save(self, save_path=""):
+    def save(self):
         # Save Model
         torch.save(self.at.state_dict(), os.path.join(self.save_path, "at.pth"))
         # Save optimizer
@@ -68,7 +68,7 @@ class ATM(BaseModel):
 
             output = self.forward(input)
 
-            all_loss = mean_loss(output, label)
+            all_loss = nn.MSELoss()(output.mean(dim=1), label[:, -1, :])
             pose_loss = nn.MSELoss()(output[:, :, 0:276].mean(dim=1), label[:, -1, 0:276])
             inverse_pose_loss = nn.MSELoss()(output[:, :, 276:345].mean(dim=1), label[:, -1, 276:345])
             trajectory_pose_loss = nn.MSELoss()(output[:, :, 345:422].mean(dim=1), label[:, -1, 345:422])
