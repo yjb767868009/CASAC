@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 from model.network import Encoder
+from model.network.attention.position import PositionalEmbedding
 
 
 class Embedding(nn.Module):
@@ -14,6 +15,9 @@ class Embedding(nn.Module):
                      parameter["encoder_activations"][i],
                      parameter["encoder_dropout"])
              for i in range(self.n_layer)])
+        self.embedding_dim = sum(parameter["encoder_dims"][i][-1]
+                                 for i in range(self.n_layer))
+        self.position = PositionalEmbedding(d_model=self.embedding_dim)
 
     def forward(self, x):
         y = []
@@ -22,4 +26,6 @@ class Embedding(nn.Module):
         y = torch.cat(y, 2)
         if torch.cuda.is_available():
             y = y.cuda()
+        p_y = self.position(x)
+        y = p_y + y
         return y
