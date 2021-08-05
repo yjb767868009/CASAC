@@ -21,8 +21,10 @@ class Model(object):
         self.atm = ATM(self.save_path, lr)
 
     def load_param(self, load_path):
+        print("Loading Param")
         self.atm.test_init()
         self.atm.load_param(load_path)
+        print("Load Finish")
 
     def forward(self, x=None):
         return self.atm.forward(x)
@@ -32,8 +34,8 @@ class Model(object):
             # if (e + 1) % 30 == 0:
             #     model.update_lr()
             train_data_iter = train_data_manager.load_data()
-            test_data_iter = test_data_manager.load_data()
             model.ep(train_data_iter, e, train=True)
+            test_data_iter = test_data_manager.load_data()
             model.ep(test_data_iter, e, train=False)
             if (e + 1) % 10 == 0:
                 print("saving")
@@ -55,7 +57,7 @@ class Model(object):
         print(message)
 
     def view_attention(self, data_iter, load_path=""):
-        print("Testing")
+        print("View Attention")
         self.load_param(load_path)
         self.atm.test_init()
         self.atm.view_attention(data_iter)
