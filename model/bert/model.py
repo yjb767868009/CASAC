@@ -37,11 +37,10 @@ class Model(object):
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter):
         for e in range(self.epoch):
-            if (e + 1) % 30 == 0:
+            if (e + 1) % 50 == 0:
                 model.update_lr()
             loss = model.ep(train_data_iter, e, train=True)
             test_loss = model.ep(test_data_iter, e, train=False)
-
             train_message = 'Epoch {} : '.format(e + 1) + \
                             'Train Loss = {:.5f} '.format(loss) + \
                             'Test Loss = {:.5f} '.format(test_loss) + \
