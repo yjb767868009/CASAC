@@ -15,7 +15,8 @@ class AT(nn.Module):
         super().__init__()
         self.save_path = save_path
         self.embedding = Embedding(conf["embedding"])
-        self.bert = BERT(save_path, conf["hidden_dim"], dropout=conf["bert_dropout"])
+        self.bert = BERT(save_path, hidden=conf["hidden_dim"],
+                         attention_head_nums=conf["attention_head_nums"], dropout=conf["bert_dropout"])
         self.prediction = Prediction(conf["hidden_dim"])
 
     def forward(self, x):
