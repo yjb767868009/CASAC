@@ -29,8 +29,8 @@ class Model(object):
 
     def step_train(self, model: BaseModel, train_data_iter, test_data_iter, epoch):
         for e in range(epoch):
-            if (e + 1) % 30 == 0:
-                model.update_lr()
+            # if (e + 1) % 30 == 0:
+            #     model.update_lr()
             model.ep(train_data_iter, e, train=True)
             model.ep(test_data_iter, e, train=False)
             if (e + 1) % 10 == 0:
