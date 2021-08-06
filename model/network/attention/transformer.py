@@ -11,20 +11,20 @@ class TransformerBlock(nn.Module):
     Transformer = MultiHead_Attention + Feed_Forward with sublayer connection
     """
 
-    def __init__(self, id, save_path, hidden, attn_heads, feed_forward_hidden, dropout):
+    def __init__(self, id, save_path, hidden_dim, attention_head_nums, feed_forward_hidden, dropout):
         """
         :param id: the id of layer
-        :param hidden: hidden size of transformer
-        :param attn_heads: head sizes of multi-head attention
+        :param hidden_dim: hidden size of transformer
+        :param attention_head_nums: head sizes of multi-head attention
         :param feed_forward_hidden: feed_forward_hidden, usually 4*hidden_size
         :param dropout: dropout rate
         """
 
         super().__init__()
-        self.attention = MultiHeadedAttention(id=id, save_path=save_path, h=attn_heads, d_model=hidden)
-        self.feed_forward = PositionwiseFeedForward(d_model=hidden, d_ff=feed_forward_hidden, dropout=dropout)
-        self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
-        self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
+        self.attention = MultiHeadedAttention(id=id, save_path=save_path, attention_head_nums=attention_head_nums, hidden_dim=hidden_dim)
+        self.feed_forward = PositionwiseFeedForward(dim=hidden_dim, hidden_dim=feed_forward_hidden, dropout=dropout)
+        self.input_sublayer = SublayerConnection(size=hidden_dim, dropout=dropout)
+        self.output_sublayer = SublayerConnection(size=hidden_dim, dropout=dropout)
         self.dropout = nn.Dropout(p=dropout, )
 
     def forward(self, x):
