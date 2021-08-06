@@ -4,6 +4,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 import torchvision
 
+view_attention_map = False
+
 
 class MultiHeadedAttention(nn.Module):
     """
@@ -24,21 +26,26 @@ class MultiHeadedAttention(nn.Module):
 
         self.dropout = nn.Dropout(p=dropout)
 
-        self.writer = SummaryWriter(save_path + '/log')
+        if view_attention_map:
+            self.writer = SummaryWriter(save_path + '/log')
+            self.epoch = 0
 
     def forward(self, query, key, value):
         batch_size = query.size(0)
 
         # 1) Do all the linear projections in batch from d_model => attention_head_nums * d_k
-        query, key, value = [l(x).view(batch_size, -1, self.attention_head_nums, self.attention_head_size).transpose(1, 2)
-                             for l, x in zip(self.linear_layers, (query, key, value))]
+        query, key, value = [
+            l(x).view(batch_size, -1, self.attention_head_nums, self.attention_head_size).transpose(1, 2)
+            for l, x in zip(self.linear_layers, (query, key, value))]
 
         # 2) Apply attention on all the projected vectors in batch.
         x, attn = self.attention(query, key, value, dropout=self.dropout)
 
-        # attn = attn.transpose(0, 1)
-        # img_grid = torchvision.utils.make_grid(attn, normalize=True, scale_each=True, nrow=4)
-        # self.writer.add_image('Attention/attention_%s' % self.id, img_grid, global_step=0)
+        if view_attention_map:
+            self.epoch += 1
+            attn = attn.transpose(0, 1)
+            img_grid = torchvision.utils.make_grid(attn, normalize=True, scale_each=True, nrow=4)
+            self.writer.add_image('Attention/attention_%s' % self.id, img_grid)
 
         # 3) "Concat" using a view and apply a final linear.
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.attention_head_nums * self.attention_head_size)
