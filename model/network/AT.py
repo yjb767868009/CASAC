@@ -30,26 +30,27 @@ class BERT(nn.Module):
     BERT model : Bidirectional Encoder Representations from Transformers.
     """
 
-    def __init__(self, save_path, hidden=1280, n_layers=8, attn_heads=32, dropout=0.1):
+    def __init__(self, save_path, hidden=1280, transformer_nums=8, attention_head_nums=32, dropout=0.1):
         """
         :param hidden: BERT model hidden size
-        :param n_layers: numbers of Transformer blocks(layers)
-        :param attn_heads: number of attention heads
+        :param transformer_nums: numbers of Transformer blocks(layers)
+        :param attention_head_nums: number of attention heads
         :param dropout: dropout rate
         """
 
         super().__init__()
         self.save_path = save_path
         self.hidden = hidden
-        self.n_layers = n_layers
-        self.attn_heads = attn_heads
+        self.n_layers = transformer_nums
+        self.attn_heads = attention_head_nums
 
         # paper noted they used 4*hidden_size for ff_network_hidden_size
         self.feed_forward_hidden = hidden * 4
 
         # multi-layers transformer blocks, deep network
         self.transformer_blocks = nn.ModuleList(
-            [TransformerBlock(i, save_path, hidden, attn_heads, hidden * 4, dropout) for i in range(n_layers)])
+            [TransformerBlock(i, save_path, hidden, attention_head_nums, hidden * 4, dropout) for i in
+             range(transformer_nums)])
 
     def forward(self, x):
         # running over multiple transformer blocks

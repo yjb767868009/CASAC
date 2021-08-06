@@ -8,7 +8,6 @@ from torch.utils.tensorboard import SummaryWriter
 from .AT import AT
 from .BaseModel import BaseModel
 from model.utils import model2gpu
-from model.utils import mean_loss
 
 
 class ATM(BaseModel):
@@ -105,7 +104,7 @@ class ATM(BaseModel):
         self.writer.add_scalars('Loss/all_loss', {title: all_loss}, epoch)
         self.writer.add_scalars('Loss/pose_loss', {title: pose_loss}, epoch)
         self.writer.add_scalars('Loss/inverse_pose_loss', {title: inverse_pose_loss}, epoch)
-        self.writer.add_scalars('Loss/trajectory_pose_loss', {title: trajectory_pose_loss}, epoch)
+        self.writer.add_scalars('Loss/trajectory_loss', {title: trajectory_pose_loss}, epoch)
         self.writer.add_scalars('Loss/inverse_trajectory_pose_loss', {title: inverse_trajectory_pose_loss}, epoch)
         self.writer.add_scalars('Loss/goal_loss', {title: goal_loss}, epoch)
         self.writer.add_scalars('Loss/contact_loss', {title: contact_loss}, epoch)
@@ -114,11 +113,15 @@ class ATM(BaseModel):
         return all_loss
 
     def view_attention(self, data_iter):
+        index = 0
         for input, label in tqdm(data_iter, ncols=100):
             input = input[0].unsqueeze(0)
             if torch.cuda.is_available():
                 input = input.cuda()
             self.at(input)
+            index += 1
+            if index > 10:
+                break
 
     def forward(self, x):
         output = self.at(x)
