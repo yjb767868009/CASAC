@@ -31,7 +31,7 @@ class BERT(nn.Module):
     BERT model : Bidirectional Encoder Representations from Transformers.
     """
 
-    def __init__(self, save_path, hidden=1280, transformer_nums=8, attention_head_nums=32, dropout=0.1):
+    def __init__(self, save_path, hidden=1280, transformer_nums=1, attention_head_nums=16, dropout=0.1):
         """
         :param hidden: BERT model hidden size
         :param transformer_nums: numbers of Transformer blocks(layers)
