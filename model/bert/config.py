@@ -16,5 +16,5 @@ conf = {
     },
     'hidden_dim': 512 + 128 + 512 + 512 + 512,
     'bert_dropout': 0.1,
-    'attention_head_nums': 17,
+    'attention_head_nums': 32,
 }
