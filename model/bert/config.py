@@ -15,6 +15,6 @@ conf = {
         'encoder_dropout': 0.3,
     },
     'hidden_dim': 512 + 128 + 512 + 512 + 512,
-    'bert_dropout': 0.1,
+    'bert_dropout': 0.2,
     'attention_head_nums': 17,
 }
