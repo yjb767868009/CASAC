@@ -60,4 +60,5 @@ class Model(object):
         print("View Attention")
         self.load_param(load_path)
         self.atm.test_init()
-        self.atm.view_attention(data_manager)
+        data_iter = data_manager.load_data()
+        self.atm.view_attention(data_iter)

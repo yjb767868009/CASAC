@@ -120,7 +120,7 @@ class ATM(BaseModel):
                 input = input.cuda()
             self.at(input)
             index += 1
-            if index > 10:
+            if index > 20:
                 break
 
     def forward(self, x):
