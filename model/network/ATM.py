@@ -87,8 +87,8 @@ class ATM(BaseModel):
             phase_loss_list.append(phase_loss.item())
             loss_list.append(loss.item())
 
-            loss.backward()
             if train:
+                loss.backward()
                 self.at_optimizer.step()
         all_loss = np.asarray(all_loss_list).mean()
         pose_loss = np.asarray(pose_loss_list).mean()
