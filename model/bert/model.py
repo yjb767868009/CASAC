@@ -21,8 +21,10 @@ class Model(object):
         self.atm = ATM(self.save_path, lr)
 
     def load_param(self, load_path):
+        print("Loading Param")
         self.atm.test_init()
         self.atm.load_param(load_path)
+        print("Load Finish")
 
     def forward(self, x=None):
         return self.atm.forward(x)
@@ -37,7 +39,9 @@ class Model(object):
                 print("saving")
                 model.save()
 
-    def train(self, train_data_iter, test_data_iter, epoch):
+    def train(self, train_data_iter, test_data_iter, epoch, load_path):
+        if load_path != "":
+            self.load_param(load_path)
         self.atm.train_init()
         self.step_train(self.atm, train_data_iter, test_data_iter, epoch)
 
@@ -51,7 +55,7 @@ class Model(object):
         print(message)
 
     def view_attention(self, data_iter, load_path=""):
-        print("Testing")
+        print("View Attention")
         self.load_param(load_path)
         self.atm.test_init()
         self.atm.view_attention(data_iter)

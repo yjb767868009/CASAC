@@ -3,116 +3,102 @@ import os
 import random
 import shutil
 import torch
-
+import numpy as np
 from tqdm import tqdm
 
 
 def get_norm(file_path):
-    with open(file_path, "r") as f:
-        lines = [list(map(float, line[:-1].split(" ")))
-                 for line in tqdm(f, desc="Loading Norm")]
-    normalize_data = torch.tensor(lines)
-    mean = normalize_data[0]
-    std = normalize_data[1]
+    norm = torch.tensor(np.loadtxt(file_path)).float()
+    mean = norm[0]
+    std = norm[1]
     for i in range(std.size(0)):
         if std[i] == 0:
             std[i] = 1
     return mean, std
 
 
-def data_preprocess(root_dir, output_root, data_length):
-    input_dir = os.path.join(output_root, "Input")
-    if not os.path.exists(input_dir):
-        os.mkdir(input_dir)
-    output_dir = os.path.join(output_root, "Label")
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
+def normalize(x, norm_path):
+    mean, std = get_norm(norm_path)
+    return (x - mean) / std
 
-    def save_data(i, write_input, write_output):
-        print("Preprocess Data " + str(i) + " ......")
-        torch.save(write_input, os.path.join(input_dir, str(i) + '.pth'))
-        torch.save(write_output, os.path.join(output_dir, str(i) + '.pth'))
 
-    def read_data(file, mean, std):
-        data_str = file.readline()
-        data = [[float(x) for x in data_str.split(' ')]]
-        data = torch.tensor(data)
-        data = (data - mean) / std
-        return data
+def save_data(file_path, norm_path, train_save_path, test_save_path, train_list, test_list):
+    data = torch.tensor(np.loadtxt(file_path)).float()
+    data = normalize(data, norm_path)
+    train_data = data[train_list]
+    test_data = data[test_list]
+    torch.save(train_data, train_save_path)
+    torch.save(test_data, test_save_path)
 
-    sequences_file = open(os.path.join(root_dir, "Sequences.txt"), 'r')
-    input_file = open(os.path.join(root_dir, "Input.txt"), 'r')
-    output_file = open(os.path.join(root_dir, "Output.txt"), 'r')
 
-    input_mean, input_std = get_norm(os.path.join(root_dir, "InputNorm.txt"))
-    output_mean, output_std = get_norm(os.path.join(root_dir, "OutputNorm.txt"))
-
+def data_len2breakpoint(data_len_list):
+    breakpoint_list = [0]
     index = 0
-    write_input_list = torch.zeros((0, 5307))
-    write_output_list = torch.zeros((0, 618))
-    length = 0
-    save_index = 0
+    for i in data_len_list:
+        index += i
+        breakpoint_list.append(index)
+    return breakpoint_list
+
+
+def data_preprocess(data_root, output_root, scale):
+    train_data_len_list = []
+    test_data_len_list = []
+    sequences_file = open(os.path.join(data_root, "Sequences.txt"), 'r')
+    # sequences_file = open(os.path.join(data_root, "tmp.txt"), 'r')
+    sequences_list = []
+    i = 0
+    data_index = 0
+    data_len = 0
+    train_list = []
+    test_list = []
+    test_or_train = False
     while True:
         sequences_data = sequences_file.readline()
         if sequences_data == '':
             break
         sequences_index = int(sequences_data) - 1
-        if index != sequences_index:
-            save_index += 1
-            write_input_list = torch.zeros((0, 5307))
-            write_output_list = torch.zeros((0, 618))
-            index = sequences_index
-            length = 0
-        input_data = read_data(input_file, input_mean, input_std)
-        output_data = read_data(output_file, output_mean, output_std)
-        write_input_list = torch.cat((write_input_list, input_data), 0)
-        write_output_list = torch.cat((write_output_list, output_data), 0)
-        length += 1
-        if length >= data_length:
-            save_data(save_index, write_input_list, write_output_list)
-            save_index += 1
-            write_input_list = torch.zeros((0, 5307))
-            write_output_list = torch.zeros((0, 618))
-            length = 0
-    print("Preprocess Data Complete")
+        test_or_train = (data_index + 1) % int(1 / scale) == 0
+        if data_index != sequences_index:
+            data_index += 1
+            if test_or_train:
+                test_data_len_list.append(data_len)
+            else:
+                train_data_len_list.append(data_len)
+            data_len = 0
+        sequences_list.append(sequences_index)
+        train_list.append(not test_or_train)
+        test_list.append(test_or_train)
+        i += 1
+        data_len += 1
+    if test_or_train:
+        test_data_len_list.append(data_len)
+    else:
+        train_data_len_list.append(data_len)
 
+    train_breakpoint_list = data_len2breakpoint(train_data_len_list)
+    test_breakpoint_list = data_len2breakpoint(test_data_len_list)
 
-def divide_train_test(root_dir, scale):
-    input_dir = os.path.join(root_dir, "Input")
-    output_dir = os.path.join(root_dir, "Label")
-    train_dir = os.path.join(root_dir, "Train")
-    test_dir = os.path.join(root_dir, "Test")
+    train_dir = os.path.join(output_root, "Train")
+    test_dir = os.path.join(output_root, "Test")
     if not os.path.exists(train_dir):
         os.mkdir(train_dir)
     if not os.path.exists(test_dir):
         os.mkdir(test_dir)
-    train_input_dir = os.path.join(train_dir, "Input")
-    train_output_dir = os.path.join(train_dir, "Label")
-    test_input_dir = os.path.join(test_dir, "Input")
-    test_output_dir = os.path.join(test_dir, "Label")
-    if not os.path.exists(train_input_dir):
-        os.mkdir(train_input_dir)
-    if not os.path.exists(train_output_dir):
-        os.mkdir(train_output_dir)
-    if not os.path.exists(test_input_dir):
-        os.mkdir(test_input_dir)
-    if not os.path.exists(test_output_dir):
-        os.mkdir(test_output_dir)
-    input_list = os.listdir(input_dir)
-    data_size = len(input_list)
-    assert data_size == len(os.listdir(output_dir)), "输入和输出文件数量不一致"
-    random_size = 0
-    for i in tqdm(range(data_size), ncols=100):
-        file = input_list[i]
-        test_file = str(random_size) + '.pth'
-        train_file = str(i - random_size) + '.pth'
-        if (i + 1) % int(1 / scale) == 0:
-            shutil.move(os.path.join(input_dir, file), os.path.join(test_input_dir, test_file))
-            shutil.move(os.path.join(output_dir, file), os.path.join(test_output_dir, test_file))
-            random_size += 1
-        else:
-            shutil.move(os.path.join(input_dir, file), os.path.join(train_input_dir, train_file))
-            shutil.move(os.path.join(output_dir, file), os.path.join(train_output_dir, train_file))
+
+    save_data(os.path.join(data_root, "Input.txt"),
+              os.path.join(data_root, "InputNorm.txt"),
+              os.path.join(train_dir, "input.pth"),
+              os.path.join(test_dir, "input.pth"),
+              train_list, test_list)
+
+    save_data(os.path.join(data_root, "Output.txt"),
+              os.path.join(data_root, "OutputNorm.txt"),
+              os.path.join(train_dir, "output.pth"),
+              os.path.join(test_dir, "output.pth"),
+              train_list, test_list)
+
+    torch.save(train_breakpoint_list, os.path.join(train_dir, "breakpoints.pth"))
+    torch.save(test_breakpoint_list, os.path.join(test_dir, "breakpoints.pth"))
 
 
 if __name__ == '__main__':
@@ -122,5 +108,4 @@ if __name__ == '__main__':
     parser.add_argument("--data_length", type=int, help="data time length")
     parser.add_argument("--scale", type=float, help="train and test scale")
     args = parser.parse_args()
-    data_preprocess(args.data_root, args.output_root, args.data_length)
-    divide_train_test(args.output_root, args.scale)
+    data_preprocess(args.data_root, args.output_root, args.scale)

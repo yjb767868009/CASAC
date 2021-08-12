@@ -26,6 +26,7 @@ class Server():
             self.input_file = open('E:/NSM/our_data/tmp/Input.txt', 'w')
             self.output_file = open('E:/NSM/our_data/tmp/Output.txt', 'w')
         self.index = 0
+        self.data_len = 2
 
     def predict(self, x):
         if self.write_file:
@@ -38,8 +39,9 @@ class Server():
         x = (x - self.input_mean) / self.input_std
         x = x.unsqueeze(0)
 
-        if self.data.size(0) == 0:
-            self.data = x.repeat(10, 1)
+        if not self.full:
+            self.data = x.repeat(self.data_len, 1)
+            self.full = True
         else:
             self.data = torch.cat((self.data, x), 0)
             self.data = self.data[1:]
@@ -66,6 +68,7 @@ class Server():
         print('start')
         while True:
             ss, addr = s.accept()
+            self.full = False
             self.data = torch.empty(0, 5307)
             self.index = 0
             print('got connected from', addr)

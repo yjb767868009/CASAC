@@ -2,95 +2,80 @@ import random
 
 import torch
 import torch.utils.data as tordata
-import numpy as np
 import os
-from tqdm import tqdm
 
-from model.utils.ReadDataProcess import read_data
+debug = False
 
 
-def load_data(data_root, batch_size, cache=True):
-    input_dir = os.path.join(data_root, 'Input')
-    label_dir = os.path.join(data_root, 'Label')
-    data_source = DataSet(input_dir, label_dir, cache)
-    if cache is True:
-        print("Loading cache")
-        data_source.load_all_data()
-        print("Loading finish")
-    data_iter = tordata.DataLoader(
-        dataset=data_source,
-        batch_size=batch_size,
-        num_workers=0,
-        shuffle=False,
-    )
-    return data_iter
+class DataManager(object):
+    def __init__(self, data_root, batch_size, data_size=0, data_len=10):
+        self.batch_size = batch_size
+        self.data_source = DataSet(data_root, data_size, data_len)
+
+    def load_data(self):
+        self.data_source.get_new_data()
+        data_iter = tordata.DataLoader(
+            dataset=self.data_source,
+            batch_size=self.batch_size,
+            num_workers=0,
+            shuffle=False,
+        )
+        return data_iter
 
 
 class DataSet(tordata.Dataset):
 
-    def __init__(self, input_dir, label_dir, cache, ):
-        self.input_data_dir = input_dir
-        assert os.path.exists(self.input_data_dir), 'No Input dir'
-        self.label_data_dir = label_dir
-        assert os.path.exists(self.label_data_dir), 'No label dir'
-
-        self.data_size = len(os.listdir(self.input_data_dir))
-        assert self.data_size == len(os.listdir(self.label_data_dir)), 'input size != label size'
-
-        self.input_data = [None for _ in range(self.data_size + 1)]
-        # self.input_data_random = [None for _ in range(self.data_size + 1)]
-        self.label_data = [None for _ in range(self.data_size + 1)]
-
-        self.cache = cache
-
-    def load_data(self, index):
-        return self.__getitem__(index)
-
-    def load_all_data(self):
-        self.input_data = read_data(self.input_data_dir, worker_nums=5)
-        self.label_data = read_data(self.label_data_dir, worker_nums=5)
-        # self.random_all_data(self.input_data)
+    def __init__(self, data_root, data_size=0, data_len=10):
+        super().__init__()
+        self.data_len = data_len
+        self.input_root = torch.load(os.path.join(data_root, "input.pth"))
+        self.label_root = torch.load(os.path.join(data_root, "output.pth"))
+        self.breakpoints = torch.load(os.path.join(data_root, "breakpoints.pth"))
+        if debug:
+            print('input', self.input_root.size(0))
+            print('label', self.label_root.size(0))
+            print('breakpoints', self.breakpoints)
+        self.max_size = self.breakpoints[-1]
+        self.input_data = []
+        self.label_data = []
+        if data_size == 0:
+            self.data_size = self.max_size // (2 * self.data_len)
 
     def __len__(self):
         return self.data_size
 
-    def __loader__(self, path):
-        return torch.load(path)
+    def get_new_data(self):
+        start_list = [random.randint(0, self.max_size - self.data_len * 2) for _ in range(self.data_size)]
+        start_list.sort()
+        if debug:
+            print('start_old', start_list)
+        index = 0
+        self.input_data = []
+        self.label_data = []
+        for i in range(self.data_size):
+            if i != 0:
+                while start_list[i] <= start_list[i - 1]:
+                    start_list[i] += 1
+                while start_list[i] < self.breakpoints[index] < start_list[i] + self.data_len:
+                    start_list[i] += 1
+                if start_list[i] > self.breakpoints[index]:
+                    index += 1
+            ir = self.input_root[start_list[i]:start_list[i] + self.data_len]
+            lr = self.label_root[start_list[i]:start_list[i] + self.data_len]
+            if debug:
+                if ir.size(0) != 10 or lr.size(0) != 10:
+                    print(ir.size(0), lr.size(0), start_list[i])
+            self.input_data.append(ir)
+            self.label_data.append(lr)
+        if debug:
+            print('start_new', start_list)
 
     def __getitem__(self, item):
-        if not self.cache:
-            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.pth'))
-            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.pth'))
-            # input_data_random = self.random_word(input_data)
-        elif self.input_data[item] is None or self.label_data[item] is None:
-            input_data = self.__loader__(os.path.join(self.input_data_dir, str(item) + '.pth'))
-            label_data = self.__loader__(os.path.join(self.label_data_dir, str(item) + '.pth'))
-            # input_data_random = self.random_word(input_data)
-            self.input_data[item] = input_data
-            # self.input_data_random[item] = input_data_random
-            self.label_data[item] = label_data
-        else:
-            input_data = self.input_data[item]
-            # input_data_random = self.input_data_random[item]
-            label_data = self.label_data[item]
-        # return input_data, input_data_random, label_data
+        input_data = self.input_data[item]
+        label_data = self.label_data[item]
         return input_data, label_data
 
-    # def random_word(self, data):
-    #     for i in range(data.size(0)):
-    #         prob = random.random()
-    #         if prob < 0.15:
-    #             prob /= 0.15
-    #
-    #             # 80% randomly change token to mask token
-    #             if prob < 0.8:
-    #                 data[i] = torch.zeros(5307)
-    #
-    #             # 10% randomly change token to random token
-    #             elif prob < 0.9:
-    #                 data[i] = data[random.randrange(data.size(0))]
-    #     return data
-    #
-    # def random_all_data(self, data):
-    #     for i in range(self.data_size):
-    #         self.input_data_random[i] = self.random_word(data[i])
+
+if __name__ == '__main__':
+    d = DataSet("D:/NSM/data/Train", 20, 100)
+    d.get_new_data()
