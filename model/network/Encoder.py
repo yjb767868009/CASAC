@@ -16,7 +16,11 @@ class Encoder(torch.nn.Module):
         self.layer1 = nn.Sequential(nn.Dropout(encoder_dropout, ),
                                     nn.Linear(encoder_dims[0], encoder_dims[1]),
                                     activation_layer(encoder_activations[0]))
+        self.layer2 = nn.Sequential(nn.Dropout(encoder_dropout, ),
+                                    nn.Linear(encoder_dims[1], encoder_dims[2]),
+                                    activation_layer(encoder_activations[1]))
 
     def forward(self, x):
         x = self.layer1(x)
+        x = self.layer2(x)
         return x
