@@ -4,6 +4,7 @@ import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
 from torch.utils.tensorboard import SummaryWriter
+import logging
 
 from .AT import AT
 from .BaseModel import BaseModel
@@ -23,6 +24,9 @@ class ATM(BaseModel):
         self.at_optimizer = torch.optim.AdamW(self.at.parameters(), lr=self.lr)
 
         self.writer = SummaryWriter(os.path.join(self.save_path, 'log'))
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s  %(message)s',
+                            filename=os.path.join(self.save_path, 'log.txt'))
 
     def train_init(self):
         self.at.train()
@@ -110,7 +114,10 @@ class ATM(BaseModel):
         self.writer.add_scalars('Loss/contact_loss', {title: contact_loss}, epoch)
         self.writer.add_scalars('Loss/phase_loss', {title: phase_loss}, epoch)
         self.writer.add_scalars('Loss/loss', {title: loss}, epoch)
-        return all_loss
+
+        message = 'Epoch {} : '.format(epoch + 1) + title + \
+                  'Loss = {:.5f} '.format(all_loss)
+        logging.info(message)
 
     def view_attention(self, data_iter):
         index = 0
