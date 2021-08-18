@@ -59,6 +59,11 @@ class ATM(BaseModel):
         inverse_trajectory_pose_loss_list = []
         goal_loss_list = []
         contact_loss_list = []
+        contact_hips_loss_list = []
+        contact_right_wrist_loss_list = []
+        contact_left_wrist_loss_list = []
+        contact_right_ankle_loss_list = []
+        contact_left_ankle_loss_list = []
         phase_loss_list = []
         loss_list = []
 
@@ -78,6 +83,11 @@ class ATM(BaseModel):
             inverse_trajectory_pose_loss = nn.MSELoss()(output[:, :, 422:450].mean(dim=1), label[:, -1, 422:450])
             goal_loss = nn.MSELoss()(output[:, :, 450:606].mean(dim=1), label[:, -1, 450:606])
             contact_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_hips_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_right_wrist_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_left_wrist_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_right_ankle_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_left_ankle_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
             phase_loss = nn.MSELoss()(output[:, :, 611:618].mean(dim=1), label[:, -1, 611:618])
             loss = pose_loss + inverse_pose_loss + trajectory_pose_loss + inverse_trajectory_pose_loss + goal_loss + contact_loss + phase_loss
 
@@ -88,6 +98,11 @@ class ATM(BaseModel):
             inverse_trajectory_pose_loss_list.append(inverse_trajectory_pose_loss.item())
             goal_loss_list.append(goal_loss.item())
             contact_loss_list.append(contact_loss.item())
+            contact_hips_loss_list.append(contact_hips_loss.item())
+            contact_right_wrist_loss_list.append(contact_right_wrist_loss.item())
+            contact_left_wrist_loss_list.append(contact_left_wrist_loss.item())
+            contact_right_ankle_loss_list.append(contact_right_ankle_loss.item())
+            contact_left_ankle_loss_list.append(contact_left_ankle_loss.item())
             phase_loss_list.append(phase_loss.item())
             loss_list.append(loss.item())
 
@@ -101,6 +116,11 @@ class ATM(BaseModel):
         inverse_trajectory_pose_loss = np.asarray(inverse_trajectory_pose_loss_list).mean()
         goal_loss = np.asarray(goal_loss_list).mean()
         contact_loss = np.asarray(contact_loss_list).mean()
+        contact_hips_loss = np.asarray(contact_hips_loss_list).mean()
+        contact_right_wrist_loss = np.asarray(contact_right_wrist_loss_list).mean()
+        contact_left_wrist_loss = np.asarray(contact_left_wrist_loss_list).mean()
+        contact_right_ankle_loss = np.asarray(contact_right_ankle_loss_list).mean()
+        contact_left_ankle_loss = np.asarray(contact_left_ankle_loss_list).mean()
         phase_loss = np.asarray(phase_loss_list).mean()
         loss = np.asarray(loss_list).mean()
 
@@ -114,6 +134,12 @@ class ATM(BaseModel):
         self.writer.add_scalars('Loss/contact_loss', {title: contact_loss}, epoch)
         self.writer.add_scalars('Loss/phase_loss', {title: phase_loss}, epoch)
         self.writer.add_scalars('Loss/loss', {title: loss}, epoch)
+
+        self.writer.add_scalars('Contact/hips', {title: contact_hips_loss}, epoch)
+        self.writer.add_scalars('Contact/right_wrist', {title: contact_right_wrist_loss}, epoch)
+        self.writer.add_scalars('Contact/left_wrist', {title: contact_left_wrist_loss}, epoch)
+        self.writer.add_scalars('Contact/right_ankle', {title: contact_right_ankle_loss}, epoch)
+        self.writer.add_scalars('Contact/left_ankle', {title: contact_left_ankle_loss}, epoch)
 
         message = 'Epoch {} : '.format(epoch + 1) + title + \
                   'Loss = {:.5f} '.format(all_loss)
