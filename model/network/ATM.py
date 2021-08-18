@@ -83,11 +83,11 @@ class ATM(BaseModel):
             inverse_trajectory_pose_loss = nn.MSELoss()(output[:, :, 422:450].mean(dim=1), label[:, -1, 422:450])
             goal_loss = nn.MSELoss()(output[:, :, 450:606].mean(dim=1), label[:, -1, 450:606])
             contact_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
-            contact_hips_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
-            contact_right_wrist_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
-            contact_left_wrist_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
-            contact_right_ankle_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
-            contact_left_ankle_loss = nn.MSELoss()(output[:, :, 606:611].mean(dim=1), label[:, -1, 606:611])
+            contact_hips_loss = nn.MSELoss()(output[:, :, 606].mean(dim=1), label[:, -1, 606])
+            contact_right_wrist_loss = nn.MSELoss()(output[:, :, 607].mean(dim=1), label[:, -1, 607])
+            contact_left_wrist_loss = nn.MSELoss()(output[:, :, 608].mean(dim=1), label[:, -1, 608])
+            contact_right_ankle_loss = nn.MSELoss()(output[:, :, 609].mean(dim=1), label[:, -1, 609])
+            contact_left_ankle_loss = nn.MSELoss()(output[:, :, 610].mean(dim=1), label[:, -1, 610])
             phase_loss = nn.MSELoss()(output[:, :, 611:618].mean(dim=1), label[:, -1, 611:618])
             loss = pose_loss + inverse_pose_loss + trajectory_pose_loss + inverse_trajectory_pose_loss + goal_loss + contact_loss + phase_loss
 
